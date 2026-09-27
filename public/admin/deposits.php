@@ -38,7 +38,7 @@ require APP_PATH . '/views/admin/header.php';
         <span class="icon-box bg-green-50 text-green-600"><i data-lucide="check-circle" class="w-5 h-5"></i></span></div>
 </div>
 
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
         <form method="get" class="flex items-center gap-3 flex-1">
             <select name="status" class="input w-44">

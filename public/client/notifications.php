@@ -17,7 +17,7 @@ $pageTitle = 'Notifications';
 $active = '';
 require APP_PATH . '/views/client/header.php';
 ?>
-<div class="card !p-0 overflow-hidden max-w-3xl">
+<div class="card !p-0 overflow-x-auto max-w-3xl">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <h2 class="font-semibold text-slate-800">Notifications</h2>
         <form method="post"><?= Csrf::field() ?><button class="btn-secondary !py-1.5 text-xs">Mark all read</button></form>

@@ -161,7 +161,7 @@ require APP_PATH . '/views/client/header.php';
                 <?php if (!$contracts): ?><li class="text-slate-400">No documents yet.</li><?php endif; ?>
             </ul>
         </div>
-        <div class="card !p-0 overflow-hidden">
+        <div class="card !p-0 overflow-x-auto">
             <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Payments</h3></div>
             <ul class="divide-y divide-gray-100 text-sm">
                 <?php foreach ($payments as $p): ?>

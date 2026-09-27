@@ -79,7 +79,7 @@ require APP_PATH . '/views/admin/header.php';
     </div>
 </div>
 
-<div class="card !p-0 overflow-hidden mt-6">
+<div class="card !p-0 overflow-x-auto mt-6">
     <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Generated Documents</h3></div>
     <table class="w-full">
         <thead><tr><th class="th">Document</th><th class="th">Booking</th><th class="th">Client</th><th class="th">Version</th><th class="th">Status</th><th class="th">Created</th><th class="th"></th></tr></thead>

@@ -42,7 +42,7 @@ $pageTitle = 'Bookings — Calendar';
 $active = 'calendar';
 require APP_PATH . '/views/admin/header.php';
 ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div class="flex items-center gap-3">
             <a href="?m=<?= date('n', $prev) ?>&y=<?= date('Y', $prev) ?>" class="btn-secondary !px-2.5"><i data-lucide="chevron-left" class="w-4 h-4"></i></a>

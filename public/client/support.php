@@ -49,7 +49,7 @@ require APP_PATH . '/views/client/header.php';
             <p><?= e(setting('company_email')) ?></p>
         </div>
     </div>
-    <div class="card !p-0 overflow-hidden">
+    <div class="card !p-0 overflow-x-auto">
         <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">My Requests</h3></div>
         <ul class="divide-y divide-gray-100">
             <?php foreach ($tickets as $t): ?>

@@ -15,7 +15,7 @@ $pageTitle = 'My Bookings';
 $active = 'bookings';
 require APP_PATH . '/views/client/header.php';
 ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <h2 class="font-semibold text-slate-800">My Bookings</h2>
         <a href="<?= url('client/browse.php') ?>" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> New booking</a>

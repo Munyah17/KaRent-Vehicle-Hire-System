@@ -71,7 +71,7 @@ $active = 'browse';
 require APP_PATH . '/views/client/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="card !p-0 overflow-hidden">
+    <div class="card !p-0 overflow-x-auto">
         <img src="<?= url($photo) ?>" class="w-full h-64 object-cover">
         <div class="p-6">
             <div class="flex items-start justify-between mb-4">

@@ -44,7 +44,7 @@ $active = 'wallets';
 require APP_PATH . '/views/admin/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-    <div class="card !p-0 overflow-hidden">
+    <div class="card !p-0 overflow-x-auto">
         <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Client Wallets</h3></div>
         <ul class="divide-y divide-gray-100">
             <?php foreach ($clients as $c): ?>
@@ -90,7 +90,7 @@ require APP_PATH . '/views/admin/header.php';
             </div>
         </div>
 
-        <div class="card !p-0 overflow-hidden">
+        <div class="card !p-0 overflow-x-auto">
             <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Ledger</h3></div>
             <table class="w-full">
                 <thead><tr><th class="th">Ref</th><th class="th">Type</th><th class="th">Description</th><th class="th">Date</th><th class="th text-right">Amount</th></tr></thead>

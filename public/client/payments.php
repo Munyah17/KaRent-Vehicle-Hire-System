@@ -14,7 +14,7 @@ $pageTitle = 'Payments';
 $active = 'payments';
 require APP_PATH . '/views/client/header.php';
 ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="px-6 py-4 border-b border-gray-100"><h2 class="font-semibold text-slate-800">Payment History</h2></div>
     <table class="w-full">
         <thead><tr>

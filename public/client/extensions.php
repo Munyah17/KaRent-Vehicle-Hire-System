@@ -20,7 +20,7 @@ $active = 'extensions';
 require APP_PATH . '/views/client/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-    <div class="xl:col-span-2 card !p-0 overflow-hidden">
+    <div class="xl:col-span-2 card !p-0 overflow-x-auto">
         <div class="px-6 py-4 border-b border-gray-100"><h2 class="font-semibold text-slate-800">Extension Requests</h2></div>
         <table class="w-full">
             <thead><tr><th class="th">Booking</th><th class="th">Vehicle</th><th class="th">New Return</th><th class="th">Extra Cost</th><th class="th">Status</th><th class="th"></th></tr></thead>

@@ -99,7 +99,7 @@ require APP_PATH . '/views/admin/header.php';
     <?= Csrf::field() ?>
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <?php foreach (['EXTERIOR','INTERIOR'] as $cat): ?>
-        <div class="card !p-0 overflow-hidden">
+        <div class="card !p-0 overflow-x-auto">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50"><h3 class="font-semibold text-slate-800"><?= e(ucfirst(strtolower($cat))) ?></h3></div>
             <table class="w-full">
                 <thead><tr><th class="th">Item</th><th class="th">Status</th><th class="th">Comment</th></tr></thead>

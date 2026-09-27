@@ -530,4 +530,21 @@ CREATE TABLE settings (
     `value` TEXT DEFAULT NULL
 ) ENGINE=InnoDB;
 
+CREATE TABLE hero_slides (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    image VARCHAR(255) NOT NULL,
+    title VARCHAR(120) NOT NULL,
+    subtitle VARCHAR(255) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    cta1_label VARCHAR(60) DEFAULT NULL,
+    cta1_url VARCHAR(255) DEFAULT NULL,
+    cta2_label VARCHAR(60) DEFAULT NULL,
+    cta2_url VARCHAR(255) DEFAULT NULL,
+    overlay TINYINT UNSIGNED NOT NULL DEFAULT 70,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_active (is_active, sort_order)
+) ENGINE=InnoDB;
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -51,44 +51,57 @@ $activity = Database::all(
 
 $pageTitle = 'Dashboard';
 $active = 'dashboard';
+// CoolAdmin Dashboard-3 style stat cards: label, value, sub-note, fa icon, colour.
 $kpis = [
-    ['Total Vehicles', $v['total'], 'car', 'bg-blue-50 text-blue-600'],
-    ['Available', $v['available'], 'check-circle', 'bg-green-50 text-green-600'],
-    ['On Hire', $v['on_hire'] + 0, 'key-round', 'bg-amber-50 text-amber-600'],
-    ['Maintenance', $v['maintenance'], 'wrench', 'bg-red-50 text-red-600'],
+    ['Total Vehicles', $v['total'], ($v['reserved'] ?? 0) . ' reserved', 'fa-car-side', 'c1'],
+    ['Available', $v['available'], 'ready to hire', 'fa-circle-check', 'c2'],
+    ['On Hire', $v['on_hire'] + 0, $depositsHeld > 0 ? money($depositsHeld) . ' deposits held' : 'no deposits held', 'fa-key', 'c3'],
+    ['Maintenance', $v['maintenance'], 'off fleet', 'fa-wrench', 'c4'],
 ];
 $fin = [
-    ["Today's Revenue", money($todayRevenue), 'banknote', 'bg-green-50 text-green-600'],
-    ['This Month', money($monthRevenue), 'trending-up', 'bg-blue-50 text-blue-600'],
-    ['Outstanding', money(max(0, $outstanding)), 'alert-circle', 'bg-red-50 text-red-600'],
-    ['Active Clients', $activeClients, 'users', 'bg-purple-50 text-purple-600'],
+    ["Today's Revenue", money($todayRevenue), 'received today', 'fa-sack-dollar', 'c2'],
+    ['This Month', money($monthRevenue), date('F Y'), 'fa-arrow-trend-up', 'c1'],
+    ['Outstanding', money(max(0, $outstanding)), 'across open bookings', 'fa-circle-exclamation', 'c3'],
+    ['Active Clients', $activeClients, $pendingKyc . ' KYC pending', 'fa-users', 'c4'],
 ];
 require APP_PATH . '/views/admin/header.php';
 ?>
-<div class="mb-6">
-    <h2 class="text-xl font-semibold text-slate-800">Welcome back, <?= e(explode(' ', $user['name'])[0]) ?></h2>
-    <p class="text-sm text-slate-500">Here's what's happening with your fleet today.</p>
+<div class="page-header">
+    <div>
+        <h1>Welcome back, <?= e(explode(' ', $user['name'])[0]) ?></h1>
+        <p class="subtitle">Here's what's happening with your fleet today.</p>
+    </div>
+    <div class="page-header__actions">
+        <a class="m-btn m-btn--ghost" href="<?= url('admin/booking-new.php') ?>"><i class="fa-solid fa-plus"></i> New booking</a>
+        <a class="m-btn m-btn--ghost" href="<?= url('admin/reports.php') ?>"><i class="fa-solid fa-download"></i> Reports</a>
+    </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
-    <?php foreach ($kpis as [$label, $val, $icon, $cls]): ?>
-    <div class="kpi-card">
-        <div>
-            <p class="text-sm text-slate-500"><?= e($label) ?></p>
-            <p class="text-2xl font-semibold text-slate-800 mt-1"><?= e((string) $val) ?></p>
-        </div>
-        <span class="icon-box <?= $cls ?>"><i data-lucide="<?= $icon ?>" class="w-5 h-5"></i></span>
+<div class="row row-tight">
+    <?php foreach ($kpis as [$label, $val, $sub, $icon, $c]): ?>
+    <div class="col-sm-6 col-lg-3">
+        <article class="stat-card">
+            <div class="stat-card__head">
+                <p class="stat-card__label"><?= e($label) ?></p>
+                <span class="stat-card__icon stat-card__icon--<?= $c ?>"><i class="fa-solid <?= $icon ?>"></i></span>
+            </div>
+            <p class="stat-card__value"><?= e((string) $val) ?></p>
+            <p class="stat-card__delta"><span class="stat-card__delta-period"><?= e($sub) ?></span></p>
+        </article>
     </div>
     <?php endforeach; ?>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-    <?php foreach ($fin as [$label, $val, $icon, $cls]): ?>
-    <div class="kpi-card">
-        <div>
-            <p class="text-sm text-slate-500"><?= e($label) ?></p>
-            <p class="text-xl font-semibold text-slate-800 mt-1"><?= e((string) $val) ?></p>
-        </div>
-        <span class="icon-box <?= $cls ?>"><i data-lucide="<?= $icon ?>" class="w-5 h-5"></i></span>
+<div class="row row-tight" style="margin-top:16px">
+    <?php foreach ($fin as [$label, $val, $sub, $icon, $c]): ?>
+    <div class="col-sm-6 col-lg-3">
+        <article class="stat-card">
+            <div class="stat-card__head">
+                <p class="stat-card__label"><?= e($label) ?></p>
+                <span class="stat-card__icon stat-card__icon--<?= $c ?>"><i class="fa-solid <?= $icon ?>"></i></span>
+            </div>
+            <p class="stat-card__value"><?= e((string) $val) ?></p>
+            <p class="stat-card__delta"><span class="stat-card__delta-period"><?= e($sub) ?></span></p>
+        </article>
     </div>
     <?php endforeach; ?>
 </div>
@@ -99,8 +112,9 @@ require APP_PATH . '/views/admin/header.php';
 </div>
 <?php endif; ?>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="card !p-0 overflow-hidden">
+<div class="row row-tight" style="margin-top:16px">
+<div class="col-lg-6">
+    <div class="card !p-0 overflow-x-auto">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-slate-800">Upcoming Bookings</h3>
             <a href="<?= url('admin/bookings.php') ?>" class="text-sm text-blue-600 hover:underline">View all</a>
@@ -128,8 +142,9 @@ require APP_PATH . '/views/admin/header.php';
             <?php endif; ?>
         </ul>
     </div>
-
-    <div class="card !p-0 overflow-hidden">
+</div>
+<div class="col-lg-6">
+    <div class="card !p-0 overflow-x-auto">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h3 class="font-semibold text-slate-800">Recent Activity</h3>
             <a href="<?= url('admin/audit.php') ?>" class="text-sm text-blue-600 hover:underline">Audit log</a>
@@ -151,5 +166,6 @@ require APP_PATH . '/views/admin/header.php';
             <?php endforeach; ?>
         </ul>
     </div>
+</div>
 </div>
 <?php require APP_PATH . '/views/admin/footer.php'; ?>

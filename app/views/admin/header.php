@@ -1,47 +1,58 @@
 <?php
 /**
- * Admin layout header: <html> + sidebar + topbar + opens <main>.
+ * Admin layout header — CoolAdmin (Dashboard 3) chrome:
+ * light .menu-sidebar, white .header-desktop, mobile header-mobile.
  * Pages set $pageTitle and $active before including.
  */
 use App\Auth;
 use App\Notify;
+use App\Database;
 
 $user = Auth::user();
 $unread = $user ? Notify::unreadCount((int) $user['id']) : 0;
+$latestNotifs = $user ? Database::all(
+    'SELECT title, body, created_at, status FROM notifications
+     WHERE user_id = ? ORDER BY id DESC LIMIT 5', [(int) $user['id']]
+) : [];
 $active = $active ?? '';
 
+// label, href, fa-icon, [children]
 $nav = [
-    'MAIN' => [
-        ['dashboard', 'Dashboard', 'admin/index.php', 'layout-dashboard'],
-        ['bookings', 'Bookings', 'admin/bookings.php', 'calendar-check'],
-        ['calendar', 'Calendar', 'admin/calendar.php', 'calendar-days'],
-    ],
-    'FLEET' => [
-        ['vehicles', 'Vehicles', 'admin/vehicles.php', 'car'],
-        ['maintenance', 'Maintenance', 'admin/maintenance.php', 'wrench'],
-        ['damages', 'Damages', 'admin/damages.php', 'car-front'],
-    ],
-    'CLIENTS' => [
-        ['clients', 'Clients', 'admin/clients.php', 'users'],
-        ['kyc', 'KYC Review', 'admin/kyc.php', 'shield-check'],
-        ['wallets', 'Wallets', 'admin/wallets.php', 'wallet'],
-        ['deposits', 'Deposits', 'admin/deposits.php', 'piggy-bank'],
-    ],
-    'FINANCE' => [
-        ['payments', 'Payments', 'admin/payments.php', 'credit-card'],
-        ['expenses', 'Expenses', 'admin/expenses.php', 'receipt'],
-    ],
-    'DOCUMENTS' => [
-        ['contracts', 'Contracts', 'admin/contracts.php', 'file-text'],
-        ['templates', 'Templates', 'admin/templates.php', 'files'],
-    ],
-    'SYSTEM' => [
-        ['reports', 'Reports', 'admin/reports.php', 'bar-chart-3'],
-        ['staff', 'Staff', 'admin/staff.php', 'user-cog'],
-        ['settings', 'Settings', 'admin/settings.php', 'settings'],
-        ['audit', 'Audit Log', 'admin/audit.php', 'history'],
-    ],
+    ['dashboard', 'Dashboard', 'admin/index.php', 'fa-gauge', null],
+    ['bookings', 'Bookings', null, 'fa-calendar-check', [
+        ['bookings', 'All bookings', 'admin/bookings.php'],
+        ['bookings', 'New booking', 'admin/booking-new.php'],
+        ['calendar', 'Calendar', 'admin/calendar.php'],
+    ]],
+    ['vehicles', 'Fleet', null, 'fa-car-side', [
+        ['vehicles', 'Vehicles', 'admin/vehicles.php'],
+        ['maintenance', 'Maintenance', 'admin/maintenance.php'],
+        ['damages', 'Damages', 'admin/damages.php'],
+    ]],
+    ['clients', 'Clients', null, 'fa-users', [
+        ['clients', 'Clients', 'admin/clients.php'],
+        ['kyc', 'KYC review', 'admin/kyc.php'],
+        ['wallets', 'Wallets', 'admin/wallets.php'],
+        ['deposits', 'Deposits', 'admin/deposits.php'],
+    ]],
+    ['payments', 'Finance', null, 'fa-credit-card', [
+        ['payments', 'Payments', 'admin/payments.php'],
+        ['expenses', 'Expenses', 'admin/expenses.php'],
+    ]],
+    ['contracts', 'Documents', null, 'fa-file-lines', [
+        ['contracts', 'Contracts', 'admin/contracts.php'],
+        ['templates', 'Templates', 'admin/templates.php'],
+        ['settings', 'Hero slides', 'admin/hero.php'],
+    ]],
+    ['reports', 'System', null, 'fa-gear', [
+        ['reports', 'Reports', 'admin/reports.php'],
+        ['staff', 'Staff', 'admin/staff.php'],
+        ['settings', 'Settings', 'admin/settings.php'],
+        ['audit', 'Audit log', 'admin/audit.php'],
+    ]],
 ];
+
+$initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,75 +60,146 @@ $nav = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($pageTitle ?? 'Admin') ?> — <?= e(config('app_name')) ?></title>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
+<script>try{if((localStorage.getItem('karent.theme')||(document.cookie.match(/theme=(dark)/)||[])[1])==='dark'){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-bs-theme','dark')}}catch(e){}</script>
+<link href="<?= url('assets/admin/css/font-face.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/admin/vendor/bootstrap-5.3.8.min.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/admin/vendor/fontawesome-7.3.1/css/all.min.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/admin/vendor/css-hamburgers/hamburgers.min.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/admin/css/theme.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/admin/css/app.css') ?>" rel="stylesheet">
+<link href="<?= url('assets/css/app.css') ?>" rel="stylesheet">
 <script src="<?= url('assets/vendor/lucide.min.js') ?>" defer></script>
 </head>
-<body class="bg-gray-50">
-<div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-[#1e3a8a] text-white flex flex-col fixed inset-y-0 z-30 overflow-y-auto">
-        <div class="h-16 flex items-center gap-3 px-5 border-b border-blue-800/60">
-            <span class="w-9 h-9 rounded-lg bg-blue-500/30 flex items-center justify-center">
-                <i data-lucide="car" class="w-5 h-5"></i>
-            </span>
-            <div>
-                <div class="font-semibold text-sm leading-tight">Vehicle Hire</div>
-                <div class="text-[11px] text-blue-300 leading-tight">Management System</div>
+<body class="app">
+<div class="page-wrapper">
+
+    <!-- Mobile topbar -->
+    <header class="header-mobile d-block d-lg-none">
+        <div class="header-mobile__bar">
+            <div class="header-mobile-inner">
+                <a class="logo" href="<?= url('admin/index.php') ?>">
+                    <span class="logo-mark">K</span><span class="logo-text">KaRent</span>
+                </a>
+                <button class="sidebar-toggle js-sidebar-toggle" type="button" aria-label="Open menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
-        <nav class="flex-1 px-3 py-4 space-y-5">
-            <?php foreach ($nav as $section => $items): ?>
-            <div>
-                <div class="px-4 mb-1.5 text-[10px] font-semibold tracking-widest text-blue-400 uppercase"><?= e($section) ?></div>
-                <div class="space-y-0.5">
-                <?php foreach ($items as [$perm, $label, $href, $icon]):
-                    if ($perm !== 'dashboard' && !Auth::can($perm)) continue;
-                    $isActive = $active === $perm; ?>
-                    <a href="<?= url($href) ?>" class="nav-link <?= $isActive ? 'active' : '' ?>">
-                        <i data-lucide="<?= e($icon) ?>" class="w-4 h-4 shrink-0"></i>
-                        <span><?= e($label) ?></span>
-                    </a>
-                <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </nav>
-        <div class="px-5 py-4 border-t border-blue-800/60 text-xs text-blue-300">
-            <?= e(setting('company_name', 'Vehicle Hire')) ?>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="menu-sidebar" id="main-sidebar">
+        <div class="logo">
+            <a class="logo-link" href="<?= url('admin/index.php') ?>">
+                <span class="logo-mark">K</span><span class="logo-text">KaRent</span>
+            </a>
+            <button class="sidebar-close js-sidebar-toggle" type="button" aria-label="Close navigation">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="menu-sidebar__content js-scrollbar1">
+            <nav class="navbar-sidebar">
+                <ul class="list-unstyled navbar__list">
+                <?php foreach ($nav as [$perm, $label, $href, $icon, $children]):
+                    if (!$children) {
+                        if ($perm !== 'dashboard' && !Auth::can($perm)) continue;
+                        ?>
+                        <li class="<?= $active === $perm ? 'active' : '' ?>">
+                            <a href="<?= url($href) ?>"><i class="fa-solid <?= $icon ?>"></i><?= e($label) ?></a>
+                        </li>
+                    <?php } else {
+                        $visible = array_filter($children, fn($c) => Auth::can($c[0]) || $c[0] === $perm);
+                        if (!$visible) continue;
+                        $open = in_array($active, array_column($children, 0), true);
+                        ?>
+                        <li class="has-sub <?= $open ? 'active' : '' ?>">
+                            <a class="js-arrow <?= $open ? 'open' : '' ?>" href="#"><i class="fa-solid <?= $icon ?>"></i><?= e($label) ?></a>
+                            <ul class="list-unstyled navbar__sub-list js-sub-list" <?= $open ? 'style="display:block"' : '' ?>>
+                                <?php foreach ($visible as [$cp, $clabel, $chref]): ?>
+                                <li class="<?= $active === $cp ? 'active' : '' ?>"><a href="<?= url($chref) ?>"><?= e($clabel) ?></a></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
+                    <?php } endforeach; ?>
+                </ul>
+            </nav>
         </div>
     </aside>
 
-    <!-- Right column -->
-    <div class="flex-1 ml-64 flex flex-col min-w-0">
-        <!-- Topbar -->
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
-            <h1 class="text-lg font-semibold text-slate-800"><?= e($pageTitle ?? '') ?></h1>
-            <div class="flex items-center gap-4">
-                <a href="<?= url('admin/notifications.php') ?>" class="relative text-gray-500 hover:text-gray-700">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <?php if ($unread > 0): ?>
-                    <span class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center"><?= $unread ?></span>
-                    <?php endif; ?>
-                </a>
-                <div class="relative" x-data>
-                    <button onclick="document.getElementById('usermenu').classList.toggle('hidden')"
-                            class="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900">
-                        <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
-                            <?= e(strtoupper(substr($user['name'] ?? 'A', 0, 1))) ?>
-                        </span>
-                        <span class="font-medium"><?= e($user['name'] ?? 'Admin') ?></span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                    </button>
-                    <div id="usermenu" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1 text-sm z-40">
-                        <div class="px-4 py-2 text-xs text-gray-400 border-b border-gray-100"><?= e($user['role_name'] ?? '') ?></div>
-                        <a href="<?= url('change-password.php') ?>" class="block px-4 py-2 hover:bg-gray-50">Change password</a>
-                        <a href="<?= url('logout.php') ?>" class="block px-4 py-2 hover:bg-gray-50 text-red-600">Sign out</a>
+    <!-- Main column -->
+    <div class="page-container">
+        <header class="header-desktop">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
+                    <div class="header-wrap">
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="sidebar-toggle js-sidebar-toggle d-none d-lg-flex" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-sidebar">
+                                <i class="fa-solid fa-bars"></i>
+                            </button>
+                            <h1 class="page-title m-0" style="font-size:1.05rem;font-weight:600"><?= e($pageTitle ?? '') ?></h1>
+                        </div>
+                        <div class="header-button">
+                            <button class="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
+                                <i class="fa-solid fa-circle-half-stroke"></i>
+                            </button>
+                            <div class="noti-wrap">
+                                <div class="noti__item js-item-menu" role="button" tabindex="0" aria-haspopup="true" aria-label="Notifications">
+                                    <i class="fa-solid fa-bell"></i>
+                                    <?php if ($unread > 0): ?><span class="quantity"><?= $unread ?></span><?php endif; ?>
+                                    <div class="notifi-dropdown js-dropdown">
+                                        <div class="notifi__title"><p>You have <?= $unread ?> unread notification<?= $unread == 1 ? '' : 's' ?></p></div>
+                                        <?php foreach ($latestNotifs as $n): ?>
+                                        <div class="notifi__item">
+                                            <div class="bg-c1 img-cir img-40"><i class="fa-solid fa-bell"></i></div>
+                                            <div class="content">
+                                                <p><?= e(mb_strimwidth($n['title'] ?: $n['body'], 0, 60, '…')) ?></p>
+                                                <span class="date"><?= e(fmt_datetime($n['created_at'])) ?></span>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                        <?php if (!$latestNotifs): ?>
+                                        <div class="notifi__item"><div class="content"><p>No notifications yet.</p></div></div>
+                                        <?php endif; ?>
+                                        <div class="notifi__footer"><a href="<?= url('admin/notifications.php') ?>">All notifications</a></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-wrap">
+                                <div class="account-item clearfix js-item-menu" role="button" tabindex="0" aria-haspopup="true" aria-label="Account menu">
+                                    <div class="image">
+                                        <span class="img-cir img-40 bg-c1 d-inline-flex align-items-center justify-content-center fw-semibold text-white"><?= e($initials) ?></span>
+                                    </div>
+                                    <div class="content"><a class="js-acc-btn" href="#"><?= e($user['name'] ?? 'Admin') ?></a></div>
+                                    <div class="account-dropdown js-dropdown">
+                                        <div class="info clearfix">
+                                            <div class="image">
+                                                <span class="img-cir img-40 bg-c1 d-inline-flex align-items-center justify-content-center fw-semibold text-white"><?= e($initials) ?></span>
+                                            </div>
+                                            <div class="content">
+                                                <h5 class="name"><a href="#"><?= e($user['name'] ?? 'Admin') ?></a></h5>
+                                                <span class="email"><?= e($user['email'] ?? '') ?></span>
+                                                <span class="d-block" style="font-size:.7rem;opacity:.6"><?= e(str_replace('_', ' ', $user['role_name'] ?? '')) ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="account-dropdown__body">
+                                            <div class="account-dropdown__item"><a href="<?= url('admin/notifications.php') ?>"><i class="fa-solid fa-bell"></i>Notifications</a></div>
+                                            <div class="account-dropdown__item"><a href="<?= url('change-password.php') ?>"><i class="fa-solid fa-key"></i>Change password</a></div>
+                                        </div>
+                                        <div class="account-dropdown__footer">
+                                            <a href="<?= url('logout.php?portal=admin') ?>"><i class="fa-solid fa-power-off"></i>Logout</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 p-6 lg:p-8">
+        <main class="main-content">
+            <div class="section__content section__content--p30">
+                <div class="container-fluid">
         <?php if ($msg = flash('success')): ?>
             <div class="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm"><?= e($msg) ?></div>
         <?php endif; ?>

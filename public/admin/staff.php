@@ -72,7 +72,7 @@ require APP_PATH . '/views/admin/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="xl:col-span-2 space-y-6">
-        <div class="card !p-0 overflow-hidden">
+        <div class="card !p-0 overflow-x-auto">
             <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Staff Accounts</h3></div>
             <table class="w-full">
                 <thead><tr><th class="th">Name</th><th class="th">Email</th><th class="th">Role</th><th class="th">Status</th><th class="th"></th></tr></thead>

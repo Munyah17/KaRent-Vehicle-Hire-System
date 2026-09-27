@@ -52,7 +52,7 @@ require APP_PATH . '/views/client/header.php';
         $photo = VehicleService::photo((int) $v['id']);
         $quote = ($pickup && $return && strtotime($return) > strtotime($pickup))
             ? VehicleService::quote($v, $pickup . ' 09:00', $return . ' 17:00') : null; ?>
-    <div class="card !p-0 overflow-hidden flex flex-col">
+    <div class="card !p-0 overflow-x-auto flex flex-col">
         <img src="<?= url($photo) ?>" class="w-full h-44 object-cover" alt="<?= e($v['make'] . ' ' . $v['model']) ?>">
         <div class="p-5 flex-1 flex flex-col">
             <div class="flex items-start justify-between">

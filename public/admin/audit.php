@@ -23,7 +23,7 @@ $pageTitle = 'Audit Log';
 $active = 'audit';
 require APP_PATH . '/views/admin/header.php';
 ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
         <form method="get" class="flex items-center gap-3">
             <select name="module" class="input w-48">

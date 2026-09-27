@@ -14,7 +14,7 @@ $pageTitle = 'My Documents';
 $active = 'documents';
 require APP_PATH . '/views/client/header.php';
 ?>
-<div class="card !p-0 overflow-hidden max-w-4xl">
+<div class="card !p-0 overflow-x-auto max-w-4xl">
     <div class="px-6 py-4 border-b border-gray-100"><h2 class="font-semibold text-slate-800">Contracts & Documents</h2></div>
     <ul class="divide-y divide-gray-100">
         <?php foreach ($contracts as $c): ?>

@@ -42,7 +42,7 @@ $active = 'templates';
 require APP_PATH . '/views/admin/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-    <div class="card !p-0 overflow-hidden">
+    <div class="card !p-0 overflow-x-auto">
         <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Templates</h3></div>
         <ul class="divide-y divide-gray-100 text-sm">
             <?php foreach ($templates as $t): ?>

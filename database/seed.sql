@@ -318,4 +318,15 @@ INSERT INTO notifications (user_id, type, title, body, link) VALUES
 INSERT INTO support_tickets (client_id, subject, message, status) VALUES
  (3,'Extension question','Can I extend my hire period online?','resolved');
 
+-- ---------- Hero slides (homepage slider — max 20) ----------
+INSERT INTO hero_slides (image, title, subtitle, description, cta1_label, cta1_url, cta2_label, cta2_url, overlay, sort_order) VALUES
+ ('uploads/vehicles/demo-1.jpg','Toyota Corolla','Reliable Sedan','1.8L petrol · Automatic · 5 seats · From $40/day — fuel-efficient comfort for city and highway driving.','Book Now','vehicle.php?id=1','Our Fleet','vehicles.php',70,10),
+ ('uploads/vehicles/demo-2.jpg','Honda Fit','Compact City Car','1.3L petrol · Automatic · 5 seats · From $30/day — nimble, economical and easy to park.','Book Now','vehicle.php?id=2','Our Fleet','vehicles.php',70,20),
+ ('uploads/vehicles/demo-3.jpg','Toyota Hilux','Workhorse Double Cab','2.4L diesel · Manual · 4x4 · From $85/day — built for load and rough terrain.','Book Now','vehicle.php?id=3','Our Fleet','vehicles.php',70,30),
+ ('uploads/vehicles/demo-4.jpg','Nissan X-Trail','Family SUV','2.5L petrol · Automatic · AWD · 7 seats · From $65/day — space and safety for the whole family.','Book Now','vehicle.php?id=4','Our Fleet','vehicles.php',70,40),
+ ('uploads/vehicles/demo-5.jpg','Ford Ranger','Premium Bakkie','3.0L diesel · Automatic · 4x4 · From $80/day — power and presence on any road.','Book Now','vehicle.php?id=5','Our Fleet','vehicles.php',70,50),
+ ('uploads/vehicles/demo-6.jpg','Mazda CX-5','Executive Crossover','2.5L petrol · Automatic · 5 seats · From $60/day — premium cabin, smooth ride.','Book Now','vehicle.php?id=6','Our Fleet','vehicles.php',70,60),
+ ('uploads/vehicles/demo-7.jpg','Toyota Fortuner','Luxury 7-Seater SUV','2.8L diesel · Automatic · 4x4 · From $95/day — flagship comfort for long journeys.','Book Now','vehicle.php?id=7','Our Fleet','vehicles.php',70,70),
+ ('uploads/vehicles/demo-8.jpg','Kia Picanto','Budget Friendly','1.0L petrol · Manual · 4 seats · From $25/day — the cheapest way to get moving.','Book Now','vehicle.php?id=8','Our Fleet','vehicles.php',70,80);
+
 SET FOREIGN_KEY_CHECKS = 1;

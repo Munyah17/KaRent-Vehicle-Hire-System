@@ -304,7 +304,7 @@ require APP_PATH . '/views/admin/header.php';
 </div>
 
 <?php elseif ($tab === 'payments'): ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <h3 class="font-semibold text-slate-800">Payments</h3>
         <a href="<?= url('admin/payment-new.php?booking=' . $id) ?>" class="btn-primary"><i data-lucide="plus" class="w-4 h-4"></i> Record Payment</a>

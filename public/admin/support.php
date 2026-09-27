@@ -34,7 +34,7 @@ $pageTitle = 'Support Requests';
 $active = 'clients';
 require APP_PATH . '/views/admin/header.php';
 ?>
-<div class="card !p-0 overflow-hidden max-w-5xl">
+<div class="card !p-0 overflow-x-auto max-w-5xl">
     <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Client Support Requests</h3></div>
     <ul class="divide-y divide-gray-100">
         <?php foreach ($tickets as $t): ?>

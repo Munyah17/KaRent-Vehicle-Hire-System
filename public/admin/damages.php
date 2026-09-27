@@ -59,7 +59,7 @@ $active = 'damages';
 require APP_PATH . '/views/admin/header.php';
 ?>
 <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-    <div class="xl:col-span-3 card !p-0 overflow-hidden">
+    <div class="xl:col-span-3 card !p-0 overflow-x-auto">
         <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
             <form method="get" class="flex items-center gap-3 flex-1">
                 <select name="status" class="input w-40">

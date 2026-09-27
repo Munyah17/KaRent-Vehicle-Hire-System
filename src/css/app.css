@@ -7,18 +7,133 @@
 }
 
 @layer components {
-    .card { @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6; }
+    .card { @apply block bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 overflow-x-auto; }
     .btn-primary { @apply inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer; }
     .btn-secondary { @apply inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer; }
     .btn-danger { @apply inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer; }
     .input { @apply w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white; }
     .label { @apply block text-sm font-medium text-gray-700 mb-1; }
     .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
-    .th { @apply bg-gray-50 text-gray-700 font-medium uppercase tracking-wider text-xs py-3 px-4 text-left; }
-    .td { @apply py-3 px-4 text-sm text-gray-600 border-b border-gray-100; }
-    .table-row { @apply border-b border-gray-100 hover:bg-gray-50; }
+    /* Bordered data table cells — readable on mobile + desktop */
+    .th { @apply bg-gray-50 text-gray-600 font-semibold uppercase tracking-wider text-xs py-3 px-4 text-left border-b-2 border-gray-200 border-r border-gray-200 last:border-r-0 whitespace-nowrap; }
+    .td { @apply py-3 px-4 text-sm text-gray-700 border-b border-gray-200 border-r border-gray-100 last:border-r-0 align-top; }
+    .table-row { @apply hover:bg-blue-50/40; }
     .nav-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-blue-100 hover:bg-blue-800 hover:text-white transition-colors; }
     .nav-link.active { @apply bg-blue-800 text-white; }
     .kpi-card { @apply bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex items-start justify-between; }
     .icon-box { @apply w-10 h-10 rounded-lg flex items-center justify-center; }
 }
+
+/* ------------------------------------------------------------------
+   Dark theme — activated by <html data-bs-theme="dark" class="dark">.
+   Covers the CoolAdmin chrome (via its own CSS vars) plus every utility
+   class used across site/client/admin pages.
+------------------------------------------------------------------- */
+html.dark body { background-color: #0f1115; color: #e9ecef; }
+html.dark { color-scheme: dark; }
+
+/* surfaces */
+html.dark .bg-white,
+html.dark .bg-slate-50 { background-color: #1c1f24; }
+html.dark .bg-gray-50 { background-color: #121417; }
+html.dark .bg-gray-100,
+html.dark .bg-slate-100 { background-color: #23262c; }
+html.dark .bg-blue-50 { background-color: rgba(66, 114, 215, .12); }
+html.dark .bg-blue-100 { background-color: rgba(66, 114, 215, .22); }
+html.dark .bg-green-50 { background-color: rgba(25, 135, 84, .15); }
+html.dark .bg-green-100 { background-color: rgba(25, 135, 84, .25); }
+html.dark .bg-red-50 { background-color: rgba(220, 53, 69, .14); }
+html.dark .bg-red-100 { background-color: rgba(220, 53, 69, .22); }
+html.dark .bg-amber-50 { background-color: rgba(217, 119, 6, .14); }
+html.dark .bg-amber-100 { background-color: rgba(217, 119, 6, .24); }
+html.dark .bg-yellow-50 { background-color: rgba(202, 138, 4, .14); }
+html.dark .bg-yellow-100 { background-color: rgba(202, 138, 4, .24); }
+html.dark .bg-orange-50 { background-color: rgba(234, 88, 12, .14); }
+html.dark .bg-purple-50 { background-color: rgba(124, 58, 237, .15); }
+html.dark .bg-emerald-50 { background-color: rgba(5, 150, 105, .15); }
+html.dark .bg-cyan-50 { background-color: rgba(8, 145, 178, .15); }
+html.dark .bg-cyan-100 { background-color: rgba(8, 145, 178, .25); }
+html.dark .bg-\[\#1e3a8a\],
+html.dark .bg-blue-900 { background-color: #0f1115; }
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover { background-color: #23262c; }
+html.dark .hover\:bg-blue-50\/40:hover { background-color: rgba(66,114,215,.08); }
+
+/* text */
+html.dark .text-slate-800, html.dark .text-slate-900,
+html.dark .text-gray-800, html.dark .text-gray-900,
+html.dark .text-gray-950 { color: #f1f3f5; }
+html.dark .text-slate-700, html.dark .text-gray-700 { color: #dde2e7; }
+html.dark .text-slate-600, html.dark .text-gray-600 { color: #c0c8d0; }
+html.dark .text-slate-500, html.dark .text-gray-500,
+html.dark .text-slate-400, html.dark .text-gray-400 { color: #9aa5b1; }
+html.dark .text-slate-300, html.dark .text-gray-300 { color: #cdd3da; }
+html.dark .text-blue-100 { color: #a8c4f8; }
+html.dark .text-blue-300 { color: #93b8f5; }
+html.dark .text-blue-400 { color: #7ea8f2; }
+html.dark .text-green-800 { color: #75d1a5; }
+html.dark .text-green-700 { color: #8fdcb4; }
+html.dark .text-red-800, html.dark .text-red-700 { color: #f2969f; }
+html.dark .text-amber-800, html.dark .text-amber-700 { color: #f3c276; }
+html.dark .text-yellow-800, html.dark .text-yellow-700 { color: #f0d67a; }
+html.dark .text-emerald-800 { color: #7dd7b5; }
+html.dark .text-blue-800 { color: #b6d2f7; }
+
+/* borders */
+html.dark .border-gray-100 { border-color: #23262c; }
+html.dark .border-gray-200 { border-color: #2a2e35; }
+html.dark .border-gray-300 { border-color: #363b44; }
+html.dark .border-blue-200 { border-color: #2f4a7a; }
+html.dark .border-green-200 { border-color: #2f5e47; }
+html.dark .border-red-200 { border-color: #6b2f36; }
+html.dark .border-blue-800\/60 { border-color: rgba(62,96,160,.5); }
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #23262c; }
+
+/* form controls */
+html.dark .input, html.dark input:not([type=checkbox]):not([type=radio]):not([type=submit]),
+html.dark select, html.dark textarea {
+    background-color: #121417; color: #e9ecef; border-color: #363b44;
+}
+html.dark input::placeholder, html.dark textarea::placeholder { color: #6b7683; }
+
+/* our component overrides */
+html.dark .card, html.dark .kpi-card {
+    background-color: #1c1f24; border-color: #2a2e35;
+    box-shadow: 0 4px 12px rgba(0,0,0,.45);
+}
+html.dark .th { background-color: #16191d; color: #9aa5b1; border-color: #2a2e35; }
+html.dark .td { color: #dde2e7; border-color: #2a2e35; border-right-color: #23262c; }
+html.dark .table-row:hover { background-color: rgba(66,114,215,.06); }
+html.dark .label { color: #dde2e7; }
+html.dark .btn-secondary { background-color: #23262c; color: #dde2e7; border-color: #363b44; }
+html.dark .btn-secondary:hover { background-color: #2a2e35; }
+
+/* Tailwind ring + focus still fine; soften site-header variants */
+html.dark .site-header { background-color: #16191d; border-color: #23262c; }
+html.dark .site-header .text-slate-700 { color: #dde2e7; }
+
+/* ------------------------------------------------------------------
+   Theme chooser modal (first visit) + toggle button
+------------------------------------------------------------------- */
+.theme-toggle {
+    @apply inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 bg-white text-slate-600 hover:bg-gray-50 transition-colors cursor-pointer;
+}
+html.dark .theme-toggle { background-color: #23262c; border-color: #363b44; color: #f3c276; }
+#theme-chooser {
+    position: fixed; inset: 0; z-index: 9999; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(15, 17, 21, .65); padding: 1rem;
+}
+#theme-chooser.show { display: flex; }
+.theme-chooser-card {
+    @apply bg-white rounded-xl shadow-xl border border-gray-200 p-6 w-full max-w-sm text-center;
+    background: var(--tc-bg, #fff); color: var(--tc-text, #1e293b);
+}
+html.dark .theme-chooser-card { --tc-bg: #1c1f24; --tc-text: #e9ecef; }
+.theme-choice {
+    @apply flex-1 rounded-lg border-2 py-4 px-3 cursor-pointer transition-colors text-sm font-medium;
+    border-color: #e5e7eb; background: #fff; color: #334155;
+}
+.theme-choice:hover { border-color: #3b82f6; }
+html.dark .theme-choice { border-color: #363b44; background: #121417; color: #e9ecef; }
+html.dark .theme-choice:hover { border-color: #4272d7; }

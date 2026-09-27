@@ -10,14 +10,15 @@ if (Auth::check()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     [$ok, $err] = Auth::attempt($_POST['email'] ?? '', $_POST['password'] ?? '');
-    if ($ok) {
-        $user = Auth::user();
-        if (!empty($user['must_change_password'])) {
-            redirect('change-password.php');
-        }
-        redirect(Auth::isAdmin() ? 'admin/index.php' : 'client/index.php');
+    if ($ok && Auth::isClient()) {
+        redirect(!empty(Auth::user()['must_change_password']) ? 'change-password.php' : 'client/index.php');
     }
-    flash('error', $err);
+    if ($ok) {
+        Auth::logout(); // staff account on the client portal — separate login pages by design
+        flash('error', 'That is a staff account. Please sign in at the staff portal.');
+    } else {
+        flash('error', $err);
+    }
     redirect('login.php');
 }
 
@@ -49,10 +50,9 @@ require APP_PATH . '/views/site/header.php';
         </div>
         <?php if (config('demo_mode')): ?>
         <div class="mt-4 rounded-lg bg-blue-50 border border-blue-100 p-4 text-xs text-blue-800">
-            <p class="font-semibold mb-1">Demo accounts</p>
-            <p>Admin: admin@demo.test / Admin@123</p>
-            <p>Staff: staff@demo.test / Staff@123</p>
-            <p>Client: john@demo.test / Client@123</p>
+            <p class="font-semibold mb-1">Demo client account</p>
+            <p>john@demo.test / Client@123</p>
+            <p class="mt-1 text-blue-600">Staff? Use the <a href="<?= url('admin/login.php') ?>" class="underline">staff sign-in</a>.</p>
         </div>
         <?php endif; ?>
     </div>

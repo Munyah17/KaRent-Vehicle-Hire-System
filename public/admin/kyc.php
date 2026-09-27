@@ -36,7 +36,7 @@ $pageTitle = 'KYC Review';
 $active = 'kyc';
 require APP_PATH . '/views/admin/header.php';
 ?>
-<div class="card !p-0 overflow-hidden">
+<div class="card !p-0 overflow-x-auto">
     <div class="px-6 py-4 border-b border-gray-100">
         <h3 class="font-semibold text-slate-800">Pending Verifications</h3>
         <p class="text-sm text-slate-500">Review documents, then approve or reject each client.</p>

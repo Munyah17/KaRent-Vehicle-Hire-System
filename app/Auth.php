@@ -127,7 +127,9 @@ final class Auth
     {
         if (!self::check()) {
             flash('error', 'Please log in to continue.');
-            redirect('login.php');
+            // Staff area gets its own dedicated login page.
+            $inAdmin = str_contains($_SERVER['SCRIPT_NAME'] ?? '', '/admin/');
+            redirect($inAdmin ? 'admin/login.php' : 'login.php');
         }
         $user = self::user();
         if (!empty($user['must_change_password'])

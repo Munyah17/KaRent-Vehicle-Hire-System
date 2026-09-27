@@ -52,7 +52,7 @@ require APP_PATH . '/views/client/header.php';
             <button class="btn-primary w-full justify-center"><i data-lucide="plus-circle" class="w-4 h-4"></i> Top Up</button>
         </form>
     </div>
-    <div class="xl:col-span-2 card !p-0 overflow-hidden">
+    <div class="xl:col-span-2 card !p-0 overflow-x-auto">
         <div class="px-6 py-4 border-b border-gray-100"><h3 class="font-semibold text-slate-800">Transaction History</h3></div>
         <table class="w-full">
             <thead><tr><th class="th">Ref</th><th class="th">Type</th><th class="th">Description</th><th class="th">Date</th><th class="th text-right">Amount</th></tr></thead>
