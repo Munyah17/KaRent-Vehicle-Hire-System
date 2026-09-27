@@ -12,7 +12,7 @@ $slides = Database::all(
     'SELECT * FROM hero_slides WHERE is_active = 1 ORDER BY sort_order, id LIMIT 20');
 if (!$slides) {
     $slides = [[
-        'image' => 'assets/img/car-placeholder.svg',
+        'image' => 'assets/img/car-placeholder.jpg',
         'title' => config('app_name'),
         'subtitle' => 'Easy Bookings · Safe Journeys · Complete Control',
         'description' => 'Reliable vehicles, transparent pricing and verified payments.',
@@ -131,25 +131,34 @@ require APP_PATH . '/views/site/header.php';
 </section>
 
 <!-- Access paths -->
-<section class="max-w-7xl mx-auto px-6 my-16">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="card">
-            <span class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4"><i data-lucide="globe" class="w-5 h-5"></i></span>
-            <h3 class="font-semibold text-slate-800 mb-1">Browse as guest</h3>
-            <p class="text-sm text-slate-500 mb-4">No account needed — browse vehicles, check availability and prices.</p>
-            <a href="<?= url('vehicles.php') ?>" class="text-blue-600 text-sm font-medium hover:underline">View vehicles →</a>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 my-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="card !p-3">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="globe" class="w-4 h-4"></i></span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-slate-800 text-sm">Browse as guest</h3>
+                    <p class="text-xs text-slate-500">No account needed — browse vehicles, check availability and prices. <a href="<?= url('vehicles.php') ?>" class="text-blue-600 font-medium hover:underline whitespace-nowrap">View vehicles →</a></p>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <span class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4"><i data-lucide="user" class="w-5 h-5"></i></span>
-            <h3 class="font-semibold text-slate-800 mb-1">Client portal</h3>
-            <p class="text-sm text-slate-500 mb-4">Manage bookings, payments, deposits, wallet and documents in one place.</p>
-            <a href="<?= url('register.php') ?>" class="text-blue-600 text-sm font-medium hover:underline">Create account →</a>
+        <div class="card !p-3">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4"></i></span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-slate-800 text-sm">Client portal</h3>
+                    <p class="text-xs text-slate-500">Manage bookings, payments, deposits, wallet and documents. <a href="<?= url('register.php') ?>" class="text-blue-600 font-medium hover:underline whitespace-nowrap">Create account →</a></p>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <span class="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4"><i data-lucide="shield-check" class="w-5 h-5"></i></span>
-            <h3 class="font-semibold text-slate-800 mb-1">Simple & secure</h3>
-            <p class="text-sm text-slate-500 mb-4">Verified payments via Paynow, transparent pricing, real vehicle photos.</p>
-            <a href="<?= url('terms.php') ?>" class="text-blue-600 text-sm font-medium hover:underline">Read terms →</a>
+        <div class="card !p-3">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-slate-800 text-sm">Simple & secure</h3>
+                    <p class="text-xs text-slate-500">Verified payments via Paynow, transparent pricing, real photos. <a href="<?= url('terms.php') ?>" class="text-blue-600 font-medium hover:underline whitespace-nowrap">Read terms →</a></p>
+                </div>
+            </div>
         </div>
     </div>
 </section>

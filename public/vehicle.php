@@ -16,7 +16,7 @@ $available = VehicleService::isAvailable($id, $pickup . ' 09:00', $return . ' 17
 $bookUrl = Auth::isClient()
     ? url('client/book.php?vehicle=' . $id . "&pickup=$pickup&return=$return")
     : url('login.php');
-$mainPhoto = !empty($photos) ? 'uploads/' . $photos[0]['file_path'] : 'assets/img/car-placeholder.svg';
+$mainPhoto = !empty($photos) ? 'uploads/' . $photos[0]['file_path'] : 'assets/img/car-placeholder.jpg';
 
 $pageTitle = $v['make'] . ' ' . $v['model'];
 $navActive = 'vehicles';

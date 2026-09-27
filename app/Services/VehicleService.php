@@ -21,7 +21,7 @@ final class VehicleService
         if ($path && file_exists(PUBLIC_UPLOAD_PATH . '/' . $path)) {
             return 'uploads/' . $path;
         }
-        return 'assets/img/car-placeholder.svg';
+        return 'assets/img/car-placeholder.jpg';
     }
 
     /**

@@ -94,7 +94,7 @@ require APP_PATH . '/views/admin/header.php';
             <?php foreach ($vehicles as $veh): ?>
             <tr class="table-row">
                 <td class="td">
-                    <img src="<?= url($veh['photo'] && file_exists(PUBLIC_UPLOAD_PATH.'/'.$veh['photo']) ? 'uploads/'.$veh['photo'] : 'assets/img/car-placeholder.svg') ?>"
+                    <img src="<?= url($veh['photo'] && file_exists(PUBLIC_UPLOAD_PATH.'/'.$veh['photo']) ? 'uploads/'.$veh['photo'] : 'assets/img/car-placeholder.jpg') ?>"
                          class="w-14 h-10 object-cover rounded-md border border-gray-200" alt="">
                 </td>
                 <td class="td font-medium text-slate-800"><?= e($veh['reg_no']) ?></td>
