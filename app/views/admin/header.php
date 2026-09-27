@@ -37,6 +37,7 @@ $nav = [
     ]],
     ['payments', 'Finance', null, 'fa-credit-card', [
         ['payments', 'Payments', 'admin/payments.php'],
+        ['payments', 'Fiscalisation', 'admin/fiscal.php', 'fiscal'],
         ['expenses', 'Expenses', 'admin/expenses.php'],
     ]],
     ['contracts', 'Documents', null, 'fa-file-lines', [
@@ -110,13 +111,15 @@ $initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
                     <?php } else {
                         $visible = array_filter($children, fn($c) => Auth::can($c[0]) || $c[0] === $perm);
                         if (!$visible) continue;
-                        $open = in_array($active, array_column($children, 0), true);
+                        $open = in_array($active, array_map(fn($c) => $c[3] ?? $c[0], $children), true);
                         ?>
                         <li class="has-sub <?= $open ? 'active' : '' ?>">
                             <a class="js-arrow <?= $open ? 'open' : '' ?>" href="#"><i class="fa-solid <?= $icon ?>"></i><?= e($label) ?></a>
                             <ul class="list-unstyled navbar__sub-list js-sub-list" <?= $open ? 'style="display:block"' : '' ?>>
-                                <?php foreach ($visible as [$cp, $clabel, $chref]): ?>
-                                <li class="<?= $active === $cp ? 'active' : '' ?>"><a href="<?= url($chref) ?>"><?= e($clabel) ?></a></li>
+                                <?php foreach ($visible as $c):
+                                    [$cp, $clabel, $chref] = $c;
+                                    $cactive = $c[3] ?? $cp; ?>
+                                <li class="<?= $active === $cactive ? 'active' : '' ?>"><a href="<?= url($chref) ?>"><?= e($clabel) ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </li>

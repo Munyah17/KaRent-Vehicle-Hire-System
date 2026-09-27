@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'national_id' => trim($_POST['national_id'] ?? ''),
             'licence_no' => trim($_POST['licence_no'] ?? ''),
             'licence_expiry' => ($_POST['licence_expiry'] ?? '') ?: null,
+            'tax_no' => trim($_POST['tax_no'] ?? ''),
+            'fiscalise' => isset($_POST['fiscalise']) ? 1 : 0,
         ];
         if ($data['full_name'] === '' || $data['phone'] === '') {
             flash('error', 'Full name and phone are required.');
@@ -144,6 +146,12 @@ require APP_PATH . '/views/admin/header.php';
                 <input name="licence_no" class="input" value="<?= e($c['licence_no'] ?? '') ?>"></div>
             <div><label class="label">Licence Expiry</label>
                 <input type="date" name="licence_expiry" class="input" value="<?= e($c['licence_expiry'] ?? '') ?>"></div>
+<div><label class="label">Tax / TIN no. (FDMS)</label>
+<input name="tax_no" class="input" value="<?= e($c['tax_no'] ?? '') ?>"></div>
+<div class="flex items-end pb-1">
+<label class="flex items-center gap-2 text-sm text-slate-700">
+<input type="checkbox" name="fiscalise" <?= !empty($c['fiscalise']) ? 'checked' : '' ?>> Fiscal receipts opt-in
+</label></div>
             <div class="col-span-2">
                 <button class="btn-primary w-full justify-center"><i data-lucide="save" class="w-4 h-4"></i>
                     <?= $id ? 'Save Changes' : 'Create Client + Account' ?></button>

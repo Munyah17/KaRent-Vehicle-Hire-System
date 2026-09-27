@@ -78,6 +78,7 @@ final class PaymentService
             Notify::send((int) $userId, 'payment', 'Payment received',
                 money($amount) . ' received (' . $method . ').', 'client/payments.php');
         }
+        FdmsService::issueForPayment($paymentId);
         return [$paymentId, null];
     }
 
@@ -120,6 +121,7 @@ final class PaymentService
                 money($payment['amount']) . ' received via Paynow.', 'client/payments.php');
         }
         Audit::log(null, 'paynow_callback', 'payments', 'payment', (int) $payment['id'], null, $status);
+        FdmsService::issueForPayment((int) $payment['id']);
     }
 
     public static function statusCounts(): array

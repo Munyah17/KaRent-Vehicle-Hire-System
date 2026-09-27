@@ -86,6 +86,8 @@ CREATE TABLE clients (
     licence_no VARCHAR(60) DEFAULT NULL,
     licence_expiry DATE DEFAULT NULL,
     photo VARCHAR(255) DEFAULT NULL,
+    tax_no VARCHAR(60) DEFAULT NULL,
+    fiscalise TINYINT(1) NOT NULL DEFAULT 0,
     kyc_status ENUM('pending','under_review','verified','rejected') NOT NULL DEFAULT 'pending',
     account_status ENUM('active','suspended') NOT NULL DEFAULT 'active',
     source ENUM('online','walk_in') NOT NULL DEFAULT 'online',
@@ -528,6 +530,48 @@ CREATE TABLE audit_logs (
 CREATE TABLE settings (
     `key` VARCHAR(80) PRIMARY KEY,
     `value` TEXT DEFAULT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE fdms_devices (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    client_id INT UNSIGNED DEFAULT NULL,
+    label VARCHAR(120) DEFAULT NULL,
+    device_id INT NOT NULL,
+    serial_number VARCHAR(60) NOT NULL,
+    model_name VARCHAR(60) NOT NULL DEFAULT 'Server',
+    model_version VARCHAR(30) NOT NULL DEFAULT 'v1',
+    environment ENUM('test','production') NOT NULL DEFAULT 'test',
+    certificate_pem MEDIUMTEXT DEFAULT NULL,
+    private_key_pem MEDIUMTEXT DEFAULT NULL,
+    qr_url VARCHAR(255) DEFAULT NULL,
+    day_state MEDIUMTEXT DEFAULT NULL,
+    pending_receipt MEDIUMTEXT DEFAULT NULL,
+    last_receipt_global_no INT NOT NULL DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    registered_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE SET NULL,
+    UNIQUE KEY uq_device (device_id, environment)
+) ENGINE=InnoDB;
+
+CREATE TABLE fdms_receipts (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    fdms_device_id INT UNSIGNED DEFAULT NULL,
+    payment_id INT UNSIGNED DEFAULT NULL,
+    booking_id INT UNSIGNED DEFAULT NULL,
+    invoice_no VARCHAR(60) DEFAULT NULL,
+    receipt_global_no INT DEFAULT NULL,
+    receipt_counter INT DEFAULT NULL,
+    server_receipt_id BIGINT DEFAULT NULL,
+    receipt_json MEDIUMTEXT DEFAULT NULL,
+    qr_data VARCHAR(255) DEFAULT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    error TEXT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (fdms_device_id) REFERENCES fdms_devices(id) ON DELETE SET NULL,
+    FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL,
+    FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL,
+    INDEX idx_status (status)
 ) ENGINE=InnoDB;
 
 CREATE TABLE hero_slides (

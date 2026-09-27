@@ -142,6 +142,33 @@ different, unrelated Polish gateway — do not use it.)*
    (`paynow/simulate.php`) exercises the full payment lifecycle locally.
    It disables itself automatically once credentials are configured.
 
+### Fiscalisation (ZIMRA FDMS) — optional
+
+Fiscal receipts for payments are a **PHP port** of the open-source
+[`zimra-fdms`](https://github.com/munashe-chivandire/zimra-fdms) SDK
+(`app/Services/FdmsService.php`) — same protocol, no npm/node needed:
+ECDSA P-256 device keys, CSR registration, mTLS, canonical signing
+strings, receipt hash chains, fiscal-day counters and QR verification.
+
+Setup at **Admin → Finance → Fiscalisation**:
+
+1. Register your device on the [FDMS portal](https://fdms.zimra.co.zw)
+   (test env: `fdmsapitest.zimra.co.zw`) to get a **device ID**, **serial**
+   and **activation key**.
+2. Register the device in the console — the app generates the EC keypair,
+   builds the CSR and completes registration. The issued certificate +
+   private key stay in the DB (mTLS PEMs are written under
+   `storage/fdms/` per request — already `.htaccess` denied and git-ignored).
+3. *Get Config* pulls your applicable tax IDs — set the default Tax ID +
+   currency in Global settings, then enable fiscalisation.
+4. **Scope**: "opted-in clients only" (each client has a *Fiscal receipts
+   opt-in* flag + Tax/TIN field on their profile) or "all payments".
+   Devices can also be registered per-client.
+5. Open the fiscal day before trading; every successful payment then
+   issues a signed, hash-chained receipt. Failures land in the receipts
+   log with one-click retry; a network-interrupted submit is reconciled
+   automatically before the next receipt.
+
 ## Demo accounts (from `seed.sql`)
 
 | Role | Email | Password |

@@ -13,11 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'save_profile') {
         Database::run(
-            'UPDATE clients SET full_name=?, dob=?, phone=?, address=?, national_id=?, licence_no=?, licence_expiry=? WHERE id=?',
+            'UPDATE clients SET full_name=?, dob=?, phone=?, address=?, national_id=?, licence_no=?, licence_expiry=?, tax_no=?, fiscalise=? WHERE id=?',
             [
                 trim($_POST['full_name']), ($_POST['dob'] ?: null), trim($_POST['phone']),
                 trim($_POST['address']), trim($_POST['national_id']), trim($_POST['licence_no']),
-                ($_POST['licence_expiry'] ?: null), $cid,
+                ($_POST['licence_expiry'] ?: null), trim($_POST['tax_no'] ?? ''),
+                isset($_POST['fiscalise']) ? 1 : 0, $cid,
             ]
         );
         if ($client['kyc_status'] === 'pending') {
@@ -73,6 +74,14 @@ require APP_PATH . '/views/client/header.php';
                 <input name="licence_no" class="input" value="<?= e($client['licence_no']) ?>"></div>
             <div><label class="label">Licence expiry</label>
                 <input type="date" name="licence_expiry" class="input" value="<?= e($client['licence_expiry']) ?>"></div>
+            <div><label class="label">Tax / TIN no. (optional)</label>
+                <input name="tax_no" class="input" value="<?= e($client['tax_no'] ?? '') ?>" placeholder="Buyer TIN for fiscal receipts"></div>
+            <div class="col-span-2">
+                <label class="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="fiscalise" <?= !empty($client['fiscalise']) ? 'checked' : '' ?>>
+                    I want fiscalised (ZIMRA FDMS) receipts for my payments
+                </label>
+            </div>
             <div class="col-span-2"><button class="btn-primary w-full justify-center"><i data-lucide="save" class="w-4 h-4"></i> Save Profile</button></div>
         </form>
     </div>

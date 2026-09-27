@@ -4,6 +4,7 @@ config/config.php
 # Runtime artifacts
 storage/logs/*
 storage/contracts/*
+storage/fdms/*
 storage/uploads/*
 public/uploads/*
 !storage/uploads/.htaccess

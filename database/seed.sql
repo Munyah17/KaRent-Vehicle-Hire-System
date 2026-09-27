@@ -305,7 +305,13 @@ INSERT INTO settings (`key`, `value`) VALUES
  ('tax_rate','0'),
  ('default_deposit','200.00'),
  ('terms_page','Standard terms apply. Edit via Contracts > Templates.'),
- ('privacy_page','We respect your privacy. Edit via Contracts > Templates.');
+ ('privacy_page','We respect your privacy. Edit via Contracts > Templates.'),
+ -- Fiscalisation (ZIMRA FDMS) — off by default; configure at Admin > Fiscalisation
+ ('fdms_enabled','0'),
+ ('fdms_scope','optin'),
+ ('fdms_device_id','0'),
+ ('fdms_tax_id','0'),
+ ('fdms_currency','USD');
 
 -- ---------- Notifications sample ----------
 INSERT INTO notifications (user_id, type, title, body, link) VALUES
