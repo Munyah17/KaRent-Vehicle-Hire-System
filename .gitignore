@@ -1,0 +1,21 @@
+# Secrets & local config — never commit
+config/config.php
+
+# Runtime artifacts
+storage/logs/*
+storage/contracts/*
+storage/uploads/*
+public/uploads/*
+!storage/uploads/.htaccess
+!public/uploads/.htaccess
+
+# Dev tooling / local database server
+.dev/
+node_modules/
+
+# Build artifacts
+vehicle-hire-deploy.zip
+
+# OS junk
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,16 @@
+{
+  "name": "vehicle-hire-system",
+  "version": "1.0.0",
+  "description": "Vehicle Hire Management System — PHP + MySQL, Tailwind UI, cPanel deployable",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i src/css/app.css -o public/assets/css/app.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.js -i src/css/app.css -o public/assets/css/app.css --watch",
+    "serve": "php -S localhost:8000 -t public",
+    "lint": "for /r %f in (*.php) do php -l \"%f\" >nul || echo FAIL %f"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.11",
+    "tailwindcss": "^3.4.19"
+  }
+}

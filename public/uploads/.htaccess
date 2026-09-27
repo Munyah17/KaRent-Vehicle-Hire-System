@@ -1,0 +1,14 @@
+# Uploads are static files only — no script execution.
+Options -Indexes -ExecCGI
+
+# Deny any script file outright (works under Apache + LiteSpeed/CGI).
+<FilesMatch "\.(php|phtml|phar|php3|php4|php5|php7|php8|pht|cgi|pl|py|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# Belt-and-braces: unmap PHP handlers where supported.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .pht
+RemoveType .php .phtml .pht
