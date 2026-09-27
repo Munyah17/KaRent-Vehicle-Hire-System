@@ -30,7 +30,7 @@ $nav = [
         ['damages', 'Damages', 'admin/damages.php'],
     ]],
     ['clients', 'Clients', null, 'fa-users', [
-        ['clients', 'Clients', 'admin/clients.php'],
+        ['clients', 'Clients Management', 'admin/clients.php'],
         ['kyc', 'KYC review', 'admin/kyc.php'],
         ['wallets', 'Wallets', 'admin/wallets.php'],
         ['deposits', 'Deposits', 'admin/deposits.php'],
@@ -47,7 +47,7 @@ $nav = [
     ]],
     ['reports', 'System', null, 'fa-gear', [
         ['reports', 'Reports', 'admin/reports.php'],
-        ['staff', 'Staff', 'admin/staff.php'],
+        ['staff', 'Staff Management', 'admin/staff.php'],
         ['settings', 'Settings', 'admin/settings.php'],
         ['audit', 'Audit log', 'admin/audit.php'],
     ]],
