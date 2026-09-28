@@ -34,9 +34,10 @@ $navItems = [
 <body class="bg-slate-50">
 <header class="site-header bg-white border-b border-gray-200 text-slate-700 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <a href="<?= url('index.php') ?>" class="flex items-center gap-3 shrink-0">
-            <span class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center"><i data-lucide="car" class="w-5 h-5"></i></span>
-        </a>
+        <button id="drawerBtn" type="button" aria-label="Open menu" aria-controls="siteDrawer"
+                class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
         <div class="flex items-center gap-3 sm:gap-4 text-sm">
             <button class="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
                 <i data-lucide="sun-moon" class="w-4 h-4"></i>
@@ -49,17 +50,38 @@ $navItems = [
             <a href="<?= url('logout.php') ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium">Sign out</a>
         </div>
     </div>
-    <nav class="border-t border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
-            <?php foreach ($navItems as [$href, $label, $icon, $key]): ?>
-            <a href="<?= url('client/' . $href) ?>"
-               class="flex items-center gap-2 px-3.5 py-3 text-sm whitespace-nowrap border-b-2 <?= $active === $key ? 'border-blue-600 text-blue-600 font-medium' : 'border-transparent text-slate-500 hover:text-slate-800' ?>">
-                <i data-lucide="<?= $icon ?>" class="w-4 h-4"></i><?= e($label) ?>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </nav>
 </header>
+
+<!-- Off-canvas navigation drawer -->
+<div id="drawerBackdrop"></div>
+<aside id="siteDrawer" aria-label="Portal navigation">
+    <div class="flex items-center justify-between px-5 h-16 border-b border-gray-200">
+        <span class="font-semibold text-slate-800">Menu</span>
+        <button id="drawerClose" type="button" aria-label="Close menu"
+                class="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
+        <?php foreach ($navItems as [$href, $label, $icon, $key]): ?>
+        <a href="<?= url('client/' . $href) ?>"
+           class="drawer-link flex items-center gap-3 px-3 py-2.5 rounded-md <?= $active === $key ? 'text-blue-600 font-medium bg-blue-50' : 'text-slate-600 hover:bg-gray-50' ?>">
+            <i data-lucide="<?= $icon ?>" class="w-4 h-4"></i><?= e($label) ?>
+        </a>
+        <?php endforeach; ?>
+    </nav>
+</aside>
+<script>
+(function () {
+    var d = document.getElementById('siteDrawer'), b = document.getElementById('drawerBackdrop');
+    function open()  { d.classList.add('open');  b.classList.add('open');  document.body.style.overflow = 'hidden'; }
+    function close() { d.classList.remove('open'); b.classList.remove('open'); document.body.style.overflow = ''; }
+    document.getElementById('drawerBtn').addEventListener('click', open);
+    document.getElementById('drawerClose').addEventListener('click', close);
+    b.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+</script>
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 <?php if ($msg = flash('success')): ?>
     <div class="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm"><?= e($msg) ?></div>
