@@ -33,10 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Staff Sign In — <?= e(config('app_name')) ?></title>
 <script>try{if((localStorage.getItem('karent.theme')||(document.cookie.match(/theme=(dark)/)||[])[1])==='dark'){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-bs-theme','dark')}}catch(e){}</script>
-<link href="<?= url('assets/admin/css/font-face.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/vendor/bootstrap-5.3.8.min.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/css/theme.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/css/app.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/css/font-face.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/vendor/bootstrap-5.3.8.min.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/css/theme.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/css/app.css') ?>" rel="stylesheet">
 </head>
 <body class="app auth-page">
 <main class="login-wrap">

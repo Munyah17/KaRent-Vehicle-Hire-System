@@ -62,14 +62,14 @@ $initials = strtoupper(substr($user['name'] ?? 'A', 0, 1));
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($pageTitle ?? 'Admin') ?> — <?= e(config('app_name')) ?></title>
 <script>try{if((localStorage.getItem('karent.theme')||(document.cookie.match(/theme=(dark)/)||[])[1])==='dark'){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-bs-theme','dark')}}catch(e){}</script>
-<link href="<?= url('assets/admin/css/font-face.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/vendor/bootstrap-5.3.8.min.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/vendor/fontawesome-7.3.1/css/all.min.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/vendor/css-hamburgers/hamburgers.min.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/css/theme.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/admin/css/app.css') ?>" rel="stylesheet">
-<link href="<?= url('assets/css/app.css') ?>" rel="stylesheet">
-<script src="<?= url('assets/vendor/lucide.min.js') ?>" defer></script>
+<link href="<?= asset('assets/admin/css/font-face.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/vendor/bootstrap-5.3.8.min.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/vendor/fontawesome-7.3.1/css/all.min.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/vendor/css-hamburgers/hamburgers.min.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/css/theme.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/admin/css/app.css') ?>" rel="stylesheet">
+<link href="<?= asset('assets/css/app.css') ?>" rel="stylesheet">
+<script src="<?= asset('assets/vendor/lucide.min.js') ?>" defer></script>
 </head>
 <body class="app">
 <div class="page-wrapper">

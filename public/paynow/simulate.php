@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Paynow Simulator (dev)</title>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>"></head>
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>"></head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
 <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-md w-full">
     <div class="text-center mb-6">

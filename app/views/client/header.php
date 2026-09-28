@@ -27,9 +27,9 @@ $navItems = [
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($pageTitle ?? 'My Account') ?> — <?= e(setting('company_name', 'Vehicle Hire')) ?></title>
 <script>try{if((localStorage.getItem('karent.theme')||(document.cookie.match(/theme=(dark)/)||[])[1])==='dark'){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-bs-theme','dark')}}catch(e){}</script>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
-<script src="<?= url('assets/vendor/lucide.min.js') ?>" defer></script>
-<script src="<?= url('assets/js/theme.js') ?>" defer></script>
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
+<script src="<?= asset('assets/vendor/lucide.min.js') ?>" defer></script>
+<script src="<?= asset('assets/js/theme.js') ?>" defer></script>
 </head>
 <body class="bg-slate-50">
 <header class="site-header bg-white border-b border-gray-200 text-slate-700 sticky top-0 z-40">

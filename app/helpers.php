@@ -27,6 +27,14 @@ function url(string $path = ''): string
     return rtrim((string) config('app_url'), '/') . '/' . ltrim($path, '/');
 }
 
+/** Asset URL with cache-busting ?v=mtime — always fresh after deploys. */
+function asset(string $path): string
+{
+    $full = PUBLIC_PATH . '/' . ltrim($path, '/');
+    $v = is_file($full) ? filemtime($full) : time();
+    return url($path) . '?v=' . $v;
+}
+
 function redirect(string $path): never
 {
     if (!str_starts_with($path, 'http')) {

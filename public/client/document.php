@@ -16,7 +16,7 @@ $sig = Database::one('SELECT * FROM signatures WHERE contract_id = ? ORDER BY id
 ?>
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title><?= e($contract['title']) ?></title>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 <style>@media print { .noprint { display:none; } }</style></head>
 <body class="bg-gray-100 py-10">
 <div class="max-w-3xl mx-auto">
