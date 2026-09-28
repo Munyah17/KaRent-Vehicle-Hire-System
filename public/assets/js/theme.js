@@ -37,10 +37,10 @@
         box.id = 'theme-chooser';
         box.innerHTML =
             '<div class="theme-chooser-card">' +
-            '<div style="font-size:2rem;line-height:1">◐</div>' +
-            '<h2 style="font-size:1.05rem;font-weight:600;margin:.5rem 0 .25rem">Choose your appearance</h2>' +
-            '<p style="font-size:.8rem;opacity:.7;margin-bottom:1rem">You can change this anytime using the toggle in the header.</p>' +
-            '<div style="display:flex;gap:.75rem">' +
+            '<div class="theme-icon">◐</div>' +
+            '<h2 class="theme-chooser-title">Choose your appearance</h2>' +
+            '<p class="theme-chooser-sub">You can change this anytime using the toggle in the header.</p>' +
+            '<div style="display:flex;gap:.6rem">' +
             '<button type="button" class="theme-choice" data-choose="light">☀ Light</button>' +
             '<button type="button" class="theme-choice" data-choose="dark">🌙 Dark</button>' +
             '</div></div>';

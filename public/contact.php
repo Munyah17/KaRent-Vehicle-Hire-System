@@ -40,7 +40,7 @@ require APP_PATH . '/views/site/header.php';
                     <input name="name" placeholder="Your name" required class="input">
                     <input type="email" name="email" placeholder="Email" required class="input">
                 </div>
-                <input name="subject" placeholder="Subject" required class="input">
+                <input name="subject" placeholder="Subject" required class="input" value="<?= e($_GET['subject'] ?? '') ?>">
                 <textarea name="message" rows="5" placeholder="Message" required class="input"></textarea>
                 <button class="btn-primary w-full justify-center"><i data-lucide="send" class="w-4 h-4"></i> Send Message</button>
             </form>

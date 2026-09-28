@@ -1,5 +1,5 @@
 <footer class="bg-[#1e3a8a] dark-footer text-blue-200 mt-16">
-    <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
+    <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 text-sm">
         <div>
             <div class="flex items-center gap-2 text-white font-semibold mb-3">
                 <i data-lucide="car" class="w-5 h-5"></i> <?= e(setting('company_name', 'Vehicle Hire')) ?>

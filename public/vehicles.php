@@ -55,23 +55,27 @@ require APP_PATH . '/views/site/header.php';
     <p class="text-sm text-slate-500 mb-6"><?= count($vehicles) ?> vehicle(s) <?= $pickup && $return ? 'available for your dates' : 'in our fleet' ?></p>
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <?php foreach ($vehicles as $v):
-            $photo = VehicleService::photo((int) $v['id']); ?>
-        <a href="<?= url('vehicle.php?id=' . $v['id'] . ($pickup ? "&pickup=$pickup&return=$return" : '')) ?>"
-           class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-            <img src="<?= url($photo) ?>" class="w-full h-48 object-cover" alt="<?= e($v['make'] . ' ' . $v['model']) ?>">
+            $photo = VehicleService::photo((int) $v['id']);
+            $vehUrl = url('vehicle.php?id=' . $v['id'] . ($pickup ? "&pickup=$pickup&return=$return" : ''));
+            $inquireUrl = url('contact.php?subject=' . rawurlencode('Inquiry: ' . $v['make'] . ' ' . $v['model'] . ' (' . $v['reg_no'] . ')')); ?>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <a href="<?= $vehUrl ?>"><img src="<?= url($photo) ?>" class="w-full h-48 object-cover" alt="<?= e($v['make'] . ' ' . $v['model']) ?>"></a>
             <div class="p-5">
                 <div class="flex items-start justify-between">
-                    <h3 class="font-semibold text-slate-800"><?= e($v['make'] . ' ' . $v['model']) ?></h3>
+                    <h3 class="font-semibold text-slate-800"><a href="<?= $vehUrl ?>" class="hover:text-blue-600"><?= e($v['make'] . ' ' . $v['model']) ?></a></h3>
                     <?= status_badge($v['status'] === 'on_hire' ? 'reserved' : $v['status']) ?>
                 </div>
                 <p class="text-xs text-slate-500 mt-1"><?= e($v['year']) ?> · <?= e(ucfirst($v['transmission'])) ?> · <?= e(ucfirst($v['fuel_type'])) ?> · <?= (int) $v['seats'] ?> seats</p>
                 <p class="text-sm text-slate-500 mt-2 line-clamp-2"><?= e($v['description']) ?></p>
                 <div class="flex items-center justify-between mt-3">
                     <p class="text-lg font-semibold text-blue-600"><?= money($v['daily_rate']) ?><span class="text-sm font-normal text-slate-400">/day</span></p>
-                    <span class="btn-primary !py-1.5 text-xs">View & book</span>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <a href="<?= $inquireUrl ?>" class="flex-1 text-center border border-gray-300 text-slate-700 hover:bg-gray-50 rounded-md px-3 py-2 text-xs font-medium">Inquire</a>
+                    <a href="<?= $vehUrl ?>" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-xs font-medium">Book Now</a>
                 </div>
             </div>
-        </a>
+        </div>
         <?php endforeach; ?>
     </div>
     <?php if (!$vehicles): ?>
