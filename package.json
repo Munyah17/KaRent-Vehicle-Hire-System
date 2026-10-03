@@ -1,16 +1,32 @@
 {
-  "name": "vehicle-hire-system",
+  "name": "karent-vehicle-hire",
   "version": "1.0.0",
-  "description": "Vehicle Hire Management System — PHP + MySQL, Tailwind UI, cPanel deployable",
   "private": true,
+  "description": "KaRent - Vehicle Hire Management System (Next.js + MySQL)",
   "scripts": {
-    "build:css": "tailwindcss -c tailwind.config.js -i src/css/app.css -o public/assets/css/app.css --minify",
-    "watch:css": "tailwindcss -c tailwind.config.js -i src/css/app.css -o public/assets/css/app.css --watch",
-    "serve": "php -S localhost:8000 -t public",
-    "lint": "for /r %f in (*.php) do php -l \"%f\" >nul || echo FAIL %f"
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "db:setup": "node scripts/setup-db.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "lucide-react": "^0.462.0",
+    "mysql2": "^3.11.4",
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.11",
-    "tailwindcss": "^3.4.19"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3"
   }
 }

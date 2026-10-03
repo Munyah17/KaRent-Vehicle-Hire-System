@@ -1,8 +1,0 @@
-[ req ]
-distinguished_name = dn
-default_md = sha256
-default_bits = 384
-prompt = no
-
-[ dn ]
-CN = default
