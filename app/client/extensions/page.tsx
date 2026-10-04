@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDate, fmtDateTime } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
 import { requireClient, listClientExtensions } from '@/components/client/data';
@@ -8,15 +8,28 @@ export const metadata = { title: 'Extensions' };
 
 export default async function ExtensionsPage() {
   const { client } = await requireClient();
-  const [exts, eligible] = await Promise.all([
+  const [extsRes, eligibleRes] = await Promise.all([
     listClientExtensions(client.id),
-    query<{ id: number; ref: string; make: string; model: string; return_at: string }>(
-      `SELECT b.id, b.ref, v.make, v.model, b.return_at FROM bookings b
-       JOIN vehicles v ON v.id = b.vehicle_id
-       WHERE b.client_id = ? AND b.status IN ('active','confirmed')`,
-      [client.id]
-    ),
+    supabase
+      .from('bookings')
+      .select('id, ref, vehicles!inner(make, model), return_at')
+      .eq('client_id', client.id)
+      .in('status', ['active', 'confirmed']),
   ]);
+
+  if (eligibleRes.error) throw new Error(`eligible bookings: ${eligibleRes.error.message}`);
+
+  const eligible = (eligibleRes.data ?? []).map((row) => {
+    const typed = row as Record<string, unknown>;
+    const vehicles = typed.vehicles as { make: string; model: string };
+    return {
+      id: typed.id as number,
+      ref: typed.ref as string,
+      make: vehicles.make,
+      model: vehicles.model,
+      return_at: typed.return_at as string,
+    };
+  });
 
   return (
     <div className="cp-grid32">
@@ -28,7 +41,7 @@ export default async function ExtensionsPage() {
               <tr><th>Booking</th><th>Vehicle</th><th>New Return</th><th className="r">Extra Cost</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
-              {exts.map((x) => (
+              {extsRes.map((x) => (
                 <tr key={x.id}>
                   <td style={{ fontWeight: 700 }}>{x.booking_ref}</td>
                   <td>{x.make} {x.model}</td>
@@ -40,7 +53,7 @@ export default async function ExtensionsPage() {
                   </td>
                 </tr>
               ))}
-              {!exts.length && <tr><td colSpan={6} className="cp-empty">No extension requests.</td></tr>}
+              {!extsRes.length && <tr><td colSpan={6} className="cp-empty">No extension requests.</td></tr>}
             </tbody>
           </table>
         </div>

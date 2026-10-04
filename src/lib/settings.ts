@@ -1,17 +1,17 @@
-import { one, run, query } from './db';
+import { supabase } from './supabase';
 
 export async function setting(key: string, fallback = ''): Promise<string> {
-  const row = await one<{ value: string }>('SELECT `value` FROM settings WHERE `key` = ?', [key]);
-  return row?.value ?? fallback;
+  const { data } = await supabase.from('settings').select('value').eq('key', key).single();
+  return data?.value ?? fallback;
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
-  await run('INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)', [key, value]);
+  await supabase.from('settings').upsert({ key, value }, { onConflict: 'key' });
 }
 
 export async function allSettings(): Promise<Record<string, string>> {
-  const rows = await query<{ key: string; value: string }>('SELECT `key`, `value` FROM settings');
-  return Object.fromEntries(rows.map((r) => [r.key, r.value ?? '']));
+  const { data } = await supabase.from('settings').select('key, value');
+  return Object.fromEntries((data ?? []).map((r) => [r.key, r.value ?? '']));
 }
 
 export const siteName = () => setting('company_name', 'KaRent');

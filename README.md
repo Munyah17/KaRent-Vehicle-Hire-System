@@ -1,37 +1,37 @@
 # KaRent — Next.js Application
 
-KaRent is a vehicle hire management system built with Next.js 15, React 19, TypeScript, Tailwind CSS, and MySQL.
+KaRent is a vehicle hire management system built with Next.js 15, React 19, TypeScript, Tailwind CSS, and Supabase.
 
 This repository contains the JavaScript/Vercel application. The legacy PHP application is maintained separately.
 
 ## Requirements
 
 - Node.js 20+
-- MySQL or MariaDB reachable from the application runtime
+- Docker Desktop
+- Supabase CLI
 
 ## Environment
 
 Create `.env.local` with:
 
 ```env
-DB_HOST=
-DB_PORT=3306
-DB_NAME=
-DB_USER=
-DB_PASS=
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_SERVICE_ROLE_KEY=
 SESSION_SECRET=
 ```
 
-Use a long random value for `SESSION_SECRET`. Never commit `.env.local`.
+Run `supabase status` after starting the local stack to obtain the local service-role key. Use a long random value for `SESSION_SECRET`. Never commit `.env.local`.
 
 ## Local development
 
 ```powershell
+supabase start
+supabase db reset
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. Supabase Studio runs at `http://127.0.0.1:54323`.
 
 ## Build
 
@@ -42,10 +42,10 @@ npm start
 
 ## Deployment
 
-The project is configured for Vercel. Add all environment variables to the Vercel project for Production, Preview, and Development before deploying.
+Configure `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SESSION_SECRET` in Vercel for Production and Preview before deploying.
 
 ```powershell
 vercel --prod
 ```
 
-The MySQL server must accept secure connections from Vercel's serverless runtime. A database bound to `127.0.0.1` on a developer machine is not reachable from Vercel.
+Apply `supabase/migrations/` to the hosted Supabase project before deploying the application.

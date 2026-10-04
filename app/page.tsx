@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { setting } from '@/lib/settings';
 import HeroSlider, { HeroSlide } from '@/components/public/HeroSlider';
 import SearchForm from '@/components/public/SearchForm';
@@ -7,17 +7,76 @@ import VehicleCard from '@/components/public/VehicleCard';
 import { getPrimaryPhoto, Vehicle } from '@/components/public/data';
 import { Globe, User, ShieldCheck } from 'lucide-react';
 
+type DbVehicle = {
+  id: number;
+  reg_no: string;
+  make: string;
+  model: string;
+  year: number | null;
+  colour: string | null;
+  transmission: string;
+  fuel_type: string;
+  engine_capacity: string | null;
+  seats: number;
+  mileage: number;
+  description: string | null;
+  daily_rate: number;
+  weekly_rate: number | null;
+  monthly_rate: number | null;
+  deposit: number;
+  status: string;
+  is_public: boolean;
+  is_featured: boolean;
+  created_at: string;
+};
+
+type SlideRow = {
+  image: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  cta1_label: string | null;
+  cta1_url: string | null;
+  cta2_label: string | null;
+  cta2_url: string | null;
+  overlay: number;
+};
+
+function toVehicle(row: DbVehicle): Vehicle {
+  return {
+    ...row,
+    is_public: row.is_public ? 1 : 0,
+    is_featured: row.is_featured ? 1 : 0,
+  };
+}
+
 export default async function HomePage() {
-  const [companyName, slidesRaw, vehicles] = await Promise.all([
+  const [companyName, slidesRaw, vehiclesRaw] = await Promise.all([
     setting('company_name', 'KaRent'),
-    query<{ image: string; title: string; subtitle: string | null; description: string | null; cta1_label: string | null; cta1_url: string | null; cta2_label: string | null; cta2_url: string | null; overlay: number }>(
-      'SELECT image, title, subtitle, description, cta1_label, cta1_url, cta2_label, cta2_url, overlay FROM hero_slides WHERE is_active = 1 ORDER BY sort_order, id LIMIT 20'
-    ),
-    query<Vehicle>("SELECT * FROM vehicles WHERE is_public = 1 AND status NOT IN ('maintenance','unavailable') ORDER BY is_featured DESC, daily_rate LIMIT 6"),
+    supabase
+      .from('hero_slides')
+      .select('image, title, subtitle, description, cta1_label, cta1_url, cta2_label, cta2_url, overlay')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(20)
+      .returns<SlideRow[]>(),
+    supabase
+      .from('vehicles')
+      .select('*')
+      .eq('is_public', true)
+      .in('status', ['available', 'reserved', 'on_hire'])
+      .order('is_featured', { ascending: false })
+      .order('daily_rate', { ascending: true })
+      .limit(6)
+      .returns<DbVehicle[]>(),
   ]);
 
-  const slides: HeroSlide[] = slidesRaw.length
-    ? slidesRaw.map((s) => ({ ...s, image: `/uploads/${s.image}` }))
+  if (slidesRaw.error) throw slidesRaw.error;
+  if (vehiclesRaw.error) throw vehiclesRaw.error;
+
+  const slides: HeroSlide[] = (slidesRaw.data ?? []).length
+    ? (slidesRaw.data ?? []).map((s) => ({ ...s, image: `/uploads/${s.image}` }))
     : [
         {
           image: '/assets/img/car-placeholder.jpg',
@@ -31,6 +90,8 @@ export default async function HomePage() {
           overlay: 70,
         },
       ];
+
+  const vehicles = (vehiclesRaw.data ?? []).map(toVehicle);
 
   const cards = await Promise.all(
     vehicles.map(async (v) => ({

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Wallet, AlertCircle, PiggyBank } from 'lucide-react';
-import { one, query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDateTime } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
 import { requireClient, walletBalance, walletTransactions, WalletTxn } from '@/components/client/data';
@@ -8,46 +8,108 @@ import type { Booking } from '@/components/client/data';
 
 export const metadata = { title: 'Dashboard' };
 
+function flattenBooking(row: Record<string, unknown>): Booking {
+  const vehicle = (row.vehicles ?? {}) as Record<string, unknown>;
+  return {
+    id: row.id as number,
+    ref: row.ref as string,
+    client_id: row.client_id as number,
+    vehicle_id: row.vehicle_id as number,
+    pickup_at: row.pickup_at as string,
+    return_at: row.return_at as string,
+    status: row.status as string,
+    base_amount: row.base_amount as string,
+    additional_amount: row.additional_amount as string,
+    discount: row.discount as string,
+    total: row.total as string,
+    deposit_required: row.deposit_required as string,
+    notes: row.notes as string | null,
+    created_at: row.created_at as string,
+    make: vehicle.make as string,
+    model: vehicle.model as string,
+    reg_no: vehicle.reg_no as string,
+    daily_rate: vehicle.daily_rate as string,
+  };
+}
+
+function sumAmount(rows: unknown[]): number {
+  return rows.reduce<number>((sum, row) => {
+    const typed = row as { amount?: string | number; total?: string | number };
+    const amount = typed.amount ?? typed.total ?? 0;
+    return sum + Number(amount ?? 0);
+  }, 0);
+}
+
 export default async function ClientDashboard() {
   const { client } = await requireClient();
   const cid = client.id;
 
-  const [current, upcoming, outstandingRow, paidRow, depositRow, wallet, recentTx] = await Promise.all([
-    one<Booking>(
-      `SELECT b.*, v.make, v.model, v.reg_no, v.daily_rate FROM bookings b
-       JOIN vehicles v ON v.id = b.vehicle_id
-       WHERE b.client_id = ? AND b.status IN ('active','overdue') ORDER BY b.return_at LIMIT 1`,
-      [cid]
-    ),
-    one<Booking>(
-      `SELECT b.*, v.make, v.model, v.reg_no, v.daily_rate FROM bookings b
-       JOIN vehicles v ON v.id = b.vehicle_id
-       WHERE b.client_id = ? AND b.status IN ('pending','confirmed') AND b.pickup_at > NOW()
-       ORDER BY b.pickup_at LIMIT 1`,
-      [cid]
-    ),
-    one<{ s: string }>(
-      `SELECT COALESCE(SUM(b.total),0) AS s FROM bookings b
-       WHERE b.client_id = ? AND b.status IN ('confirmed','active','overdue')`,
-      [cid]
-    ),
-    one<{ s: string }>(
-      `SELECT COALESCE(SUM(p.amount),0) AS s FROM payments p JOIN bookings b ON b.id = p.booking_id
-       WHERE p.client_id = ? AND p.status = 'successful' AND p.purpose IN ('rental','extension')
-         AND b.status IN ('confirmed','active','overdue')`,
-      [cid]
-    ),
-    one<{ s: string }>(
-      `SELECT COALESCE(SUM(received_amount - deducted_amount - refunded_amount),0) AS s
-       FROM deposits WHERE client_id = ? AND status IN ('held','partial')`,
-      [cid]
-    ),
+  const nowIso = new Date().toISOString();
+  const [
+    currentRes,
+    upcomingRes,
+    outstandingRes,
+    paymentsRes,
+    depositsRes,
+    wallet,
+    recentTx,
+  ] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('*, vehicles!inner(make, model, reg_no, daily_rate)')
+      .eq('client_id', cid)
+      .in('status', ['active', 'overdue'])
+      .order('return_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('bookings')
+      .select('*, vehicles!inner(make, model, reg_no, daily_rate)')
+      .eq('client_id', cid)
+      .in('status', ['pending', 'confirmed'])
+      .gt('pickup_at', nowIso)
+      .order('pickup_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('bookings').select('total').eq('client_id', cid).in('status', ['confirmed', 'active', 'overdue']),
+    supabase
+      .from('payments')
+      .select('amount, bookings!inner(status)')
+      .eq('client_id', cid)
+      .eq('status', 'successful')
+      .in('purpose', ['rental', 'extension']),
+    supabase
+      .from('deposits')
+      .select('received_amount, deducted_amount, refunded_amount')
+      .eq('client_id', cid)
+      .in('status', ['held', 'partial']),
     walletBalance(cid),
     walletTransactions(cid, 5),
   ]);
 
-  const outstanding = Math.max(0, Number(outstandingRow?.s ?? 0) - Number(paidRow?.s ?? 0));
-  const depositHeld = Number(depositRow?.s ?? 0);
+  if (currentRes.error) throw new Error(`Current booking: ${currentRes.error.message}`);
+  if (upcomingRes.error) throw new Error(`Upcoming booking: ${upcomingRes.error.message}`);
+  if (outstandingRes.error) throw new Error(`Outstanding bookings: ${outstandingRes.error.message}`);
+  if (paymentsRes.error) throw new Error(`Paid bookings: ${paymentsRes.error.message}`);
+  if (depositsRes.error) throw new Error(`Deposits: ${depositsRes.error.message}`);
+
+  const current = currentRes.data ? flattenBooking(currentRes.data as Record<string, unknown>) : null;
+  const upcoming = upcomingRes.data ? flattenBooking(upcomingRes.data as Record<string, unknown>) : null;
+
+  const totalOutstanding = sumAmount(outstandingRes.data ?? []);
+  const successfulPayments = (paymentsRes.data ?? []).filter((row) =>
+    ['confirmed', 'active', 'overdue'].includes(((row as Record<string, unknown>).bookings as { status: string }).status)
+  );
+  const totalPaid = sumAmount(successfulPayments);
+  const outstanding = Math.max(0, totalOutstanding - totalPaid);
+  const depositHeld = (depositsRes.data ?? []).reduce(
+    (sum, row) =>
+      sum +
+      Number(((row as { received_amount: string | number }).received_amount ?? 0)) -
+      Number(((row as { deducted_amount: string | number }).deducted_amount ?? 0)) -
+      Number(((row as { refunded_amount: string | number }).refunded_amount ?? 0)),
+    0
+  );
   const firstName = client.full_name.split(' ')[0];
 
   return (

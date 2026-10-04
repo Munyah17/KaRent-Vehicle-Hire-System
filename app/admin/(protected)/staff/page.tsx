@@ -1,30 +1,44 @@
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { fmtDate, Badge } from '@/lib/helpers';
+
+interface StaffRow {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: string;
+  last_login_at: string | null;
+  created_at: string;
+  roles: { name: string } | { name: string }[] | null;
+}
+
+/** Strip characters that would break a PostgREST `or` filter expression. */
+function orSafe(value: string): string {
+  return value.replace(/[(),\\"]/g, '');
+}
 
 export default async function StaffPage({ searchParams }: { searchParams?: Promise<{ q?: string; role?: string }> }) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const role = (params?.role ?? '').trim();
 
-  let where = 'WHERE u.role_id IN (1,2)';
-  const args: any[] = [];
+  let qb = supabase
+    .from('users')
+    .select('id, name, email, phone, status, last_login_at, created_at, roles!inner(name)')
+    .in('roles.name', ['SUPER_ADMIN', 'STAFF'])
+    .order('name')
+    .limit(200);
+
   if (q) {
-    where += ' AND (u.name LIKE ? OR u.email LIKE ?)';
-    args.push(`%${q}%`, `%${q}%`);
+    qb = qb.or(`name.ilike.%${orSafe(q)}%,email.ilike.%${orSafe(q)}%`);
   }
   if (role) {
-    where += ' AND r.name = ?';
-    args.push(role);
+    qb = qb.eq('roles.name', role);
   }
 
-  const rows = await query<any>(`
-    SELECT u.id, u.name, u.email, u.phone, u.status, u.last_login_at, u.created_at, r.name AS role
-    FROM users u
-    JOIN roles r ON r.id = u.role_id
-    ${where}
-    ORDER BY u.name
-    LIMIT 200
-  `, args);
+  const { data, error } = await qb;
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as StaffRow[];
 
   const roles = ['SUPER_ADMIN', 'STAFF'];
 
@@ -56,17 +70,20 @@ export default async function StaffPage({ searchParams }: { searchParams?: Promi
             </tr>
           </thead>
           <tbody>
-            {rows.map((s) => (
-              <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50">
-                <td className="px-5 py-3 font-medium text-slate-700">{s.name}</td>
-                <td className="px-5 py-3 text-slate-600">{s.email}</td>
-                <td className="px-5 py-3 text-slate-600">{s.phone ?? '—'}</td>
-                <td className="px-5 py-3 text-slate-600">{s.role}</td>
-                <td className="px-5 py-3"><Badge status={s.status} /></td>
-                <td className="px-5 py-3 text-slate-600">{fmtDate(s.last_login_at)}</td>
-                <td className="px-5 py-3 text-slate-600">{fmtDate(s.created_at)}</td>
-              </tr>
-            ))}
+            {rows.map((s) => {
+              const roleName = Array.isArray(s.roles) ? s.roles[0]?.name : s.roles?.name;
+              return (
+                <tr key={s.id} className="border-t border-slate-100 hover:bg-slate-50">
+                  <td className="px-5 py-3 font-medium text-slate-700">{s.name}</td>
+                  <td className="px-5 py-3 text-slate-600">{s.email}</td>
+                  <td className="px-5 py-3 text-slate-600">{s.phone ?? '—'}</td>
+                  <td className="px-5 py-3 text-slate-600">{roleName}</td>
+                  <td className="px-5 py-3"><Badge status={s.status} /></td>
+                  <td className="px-5 py-3 text-slate-600">{fmtDate(s.last_login_at)}</td>
+                  <td className="px-5 py-3 text-slate-600">{fmtDate(s.created_at)}</td>
+                </tr>
+              );
+            })}
             {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-6 text-slate-400">No staff found.</td></tr>}
           </tbody>
         </table>

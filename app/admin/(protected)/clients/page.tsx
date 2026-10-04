@@ -1,29 +1,45 @@
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { fmtDate, Badge } from '@/lib/helpers';
+
+interface ClientRow {
+  id: number;
+  client_no: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  kyc_status: string;
+  account_status: string;
+  source: string;
+  created_at: string;
+}
+
+/** Strip characters that would break a PostgREST `or` filter expression. */
+function orSafe(value: string): string {
+  return value.replace(/[(),\\"]/g, '');
+}
 
 export default async function ClientsPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const status = (params?.status ?? '').trim();
 
-  let where = 'WHERE 1=1';
-  const args: any[] = [];
+  let qb = supabase
+    .from('clients')
+    .select('id, client_no, full_name, email, phone, kyc_status, account_status, source, created_at')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
   if (q) {
-    where += ' AND (full_name LIKE ? OR email LIKE ? OR phone LIKE ? OR client_no LIKE ?)';
-    args.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`);
+    const pat = orSafe(q);
+    qb = qb.or(`full_name.ilike.%${pat}%,email.ilike.%${pat}%,phone.ilike.%${pat}%,client_no.ilike.%${pat}%`);
   }
   if (status) {
-    where += ' AND account_status = ?';
-    args.push(status);
+    qb = qb.eq('account_status', status);
   }
 
-  const rows = await query<any>(`
-    SELECT id, client_no, full_name, email, phone, kyc_status, account_status, source, created_at
-    FROM clients
-    ${where}
-    ORDER BY created_at DESC
-    LIMIT 200
-  `, args);
+  const { data, error } = await qb;
+  if (error) throw error;
+  const rows = (data ?? []) as ClientRow[];
 
   const statuses = ['active', 'suspended'];
 

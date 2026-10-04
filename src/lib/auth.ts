@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { one, run } from './db';
+import { supabase } from './supabase';
 
 export const COOKIE = 'karent_session';
 const secret = () => new TextEncoder().encode(process.env.SESSION_SECRET || 'dev-secret-change-me');
@@ -16,35 +16,58 @@ export interface SessionUser {
   clientId?: number;
 }
 
-/** Map php password_hash ($2y$) to bcryptjs ($2a$). */
 function normalizeHash(h: string): string {
   return h.replace(/^\$2y\$/, '$2a$');
 }
 
 export async function attemptLogin(identifier: string, password: string, ip = ''): Promise<SessionUser | null> {
-  const user = await one<any>(
-    `SELECT u.id, u.name, u.email, u.password_hash, u.status, r.name AS role
-     FROM users u JOIN roles r ON r.id = u.role_id
-     WHERE u.email = ? LIMIT 1`,
-    [identifier]
-  );
-  const ok = user && user.status === 'active' && bcrypt.compareSync(password, normalizeHash(user.password_hash));
-  await run('INSERT INTO login_attempts (email, ip, successful) VALUES (?, ?, ?)', [identifier, ip, ok ? 1 : 0]);
-  if (!ok) return null;
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('id, name, email, password_hash, status, roles(name)')
+    .eq('email', identifier)
+    .maybeSingle();
 
-  await run('UPDATE users SET last_login_at = NOW() WHERE id = ?', [user.id]);
-  const sess: SessionUser = { id: user.id, name: user.name, email: user.email, role: user.role };
-  if (user.role === 'CLIENT') {
-    const c = await one<any>('SELECT id FROM clients WHERE user_id = ?', [user.id]);
-    if (c) sess.clientId = c.id;
+  if (userError) throw userError;
+  const ok = Boolean(user && user.status === 'active' && bcrypt.compareSync(password, normalizeHash(user.password_hash)));
+  const { error: attemptError } = await supabase
+    .from('login_attempts')
+    .insert({ email: identifier, ip, successful: ok });
+  if (attemptError) throw attemptError;
+
+  if (!ok || !user) return null;
+
+  await supabase.from('users').update({ last_login_at: new Date().toISOString() }).eq('id', user.id);
+
+  const rolesData = (user as any).roles;
+  const roleName = Array.isArray(rolesData) ? rolesData[0]?.name : rolesData?.name;
+
+  const sess: SessionUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: roleName as RoleCode,
+  };
+
+  if (sess.role === 'CLIENT') {
+    const { data: client } = await supabase.from('clients').select('id').eq('user_id', user.id).single();
+    if (client) sess.clientId = client.id;
   }
+
   const token = await new SignJWT(sess as any)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
     .sign(secret());
+
   const jar = await cookies();
-  jar.set(COOKIE, token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 7 * 86400 });
+  jar.set(COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 7 * 86400,
+    secure: process.env.NODE_ENV === 'production',
+  });
+
   return sess;
 }
 

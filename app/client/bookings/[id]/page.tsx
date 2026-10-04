@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FileText } from 'lucide-react';
-import { query, one } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDate, fmtDateTime } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
 import ExtensionForm from '@/components/client/ExtensionForm';
@@ -15,12 +15,13 @@ import {
   walletBalance,
   listBookingExtensions,
 } from '@/components/client/data';
-import type { Payment } from '@/components/client/data';
+import type { Payment, Contract } from '@/components/client/data';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const b = await one<{ ref: string }>('SELECT ref FROM bookings WHERE id = ?', [Number(id)]);
-  return { title: b ? `Booking ${b.ref}` : 'Booking' };
+  const { data, error } = await supabase.from('bookings').select('ref').eq('id', Number(id)).maybeSingle();
+  if (error) throw new Error(`generateMetadata: ${error.message}`);
+  return { title: data?.ref ? `Booking ${data.ref}` : 'Booking' };
 }
 
 export default async function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -30,26 +31,60 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
   const b = await findClientBooking(client.id, bookingId);
   if (!b) notFound();
 
-  const [payments, deposit, extensions, contracts, paid, outstanding, wallet, photo, charges] = await Promise.all([
-    query<Payment>('SELECT * FROM payments WHERE booking_id = ? ORDER BY id DESC', [bookingId]),
-    one<{ required_amount: string; received_amount: string; deducted_amount: string; refunded_amount: string; status: string }>(
-      'SELECT required_amount, received_amount, deducted_amount, refunded_amount, status FROM deposits WHERE booking_id = ?',
-      [bookingId]
-    ),
+  const [
+    paymentsRes,
+    depositRes,
+    extensions,
+    contractsRes,
+    paid,
+    outstanding,
+    wallet,
+    photo,
+    chargesRes,
+  ] = await Promise.all([
+    supabase
+      .from('payments')
+      .select('*')
+      .eq('booking_id', bookingId)
+      .order('id', { ascending: false }),
+    supabase
+      .from('deposits')
+      .select('required_amount, received_amount, deducted_amount, refunded_amount, status')
+      .eq('booking_id', bookingId)
+      .maybeSingle(),
     listBookingExtensions(bookingId),
-    query<{ id: number; title: string; status: string }>(
-      "SELECT id, title, status FROM contracts WHERE booking_id = ? AND status != 'void' ORDER BY id DESC",
-      [bookingId]
-    ),
+    supabase
+      .from('contracts')
+      .select('id, title, status')
+      .eq('booking_id', bookingId)
+      .neq('status', 'void')
+      .order('id', { ascending: false }),
     amountPaid(bookingId),
     bookingOutstanding(bookingId),
     walletBalance(client.id),
     getPrimaryPhoto(b.vehicle_id),
-    query<{ id: number; label: string; amount: string; created_at: string }>(
-      'SELECT id, label, amount, created_at FROM booking_charges WHERE booking_id = ? ORDER BY id',
-      [bookingId]
-    ),
+    supabase
+      .from('booking_charges')
+      .select('id, label, amount, created_at')
+      .eq('booking_id', bookingId)
+      .order('id', { ascending: true }),
   ]);
+
+  if (paymentsRes.error) throw new Error(`payments: ${paymentsRes.error.message}`);
+  if (depositRes.error) throw new Error(`deposit: ${depositRes.error.message}`);
+  if (contractsRes.error) throw new Error(`contracts: ${contractsRes.error.message}`);
+  if (chargesRes.error) throw new Error(`charges: ${chargesRes.error.message}`);
+
+  const payments = (paymentsRes.data ?? []) as Payment[];
+  const deposit = depositRes.data as {
+    required_amount: string;
+    received_amount: string;
+    deducted_amount: string;
+    refunded_amount: string;
+    status: string;
+  } | null;
+  const contracts = (contractsRes.data ?? []) as Contract[];
+  const charges = chargesRes.data as { id: number; label: string; amount: string; created_at: string }[];
 
   const canPay = outstanding > 0 && ['pending', 'confirmed', 'active'].includes(b.status);
   const canExtend = ['active', 'confirmed'].includes(b.status);

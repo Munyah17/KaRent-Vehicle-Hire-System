@@ -1,33 +1,73 @@
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDate } from '@/lib/helpers';
 
+interface TodayBookingRow {
+  id: number;
+  ref: string;
+  pickup_at: string;
+  status: string;
+  clients: { full_name: string } | { full_name: string }[] | null;
+  vehicles: { reg_no: string } | { reg_no: string }[] | null;
+}
+
+interface RecentPaymentRow {
+  id: number;
+  txn_id: string;
+  amount: number;
+  method: string;
+  status: string;
+  paid_at: string | null;
+  clients: { full_name: string } | { full_name: string }[] | null;
+}
+
 export default async function DashboardPage() {
-  const counts = await query<{ label: string; value: number }>(`
-    SELECT 'bookings' AS label, COUNT(*) AS value FROM bookings
-    UNION ALL SELECT 'vehicles', COUNT(*) FROM vehicles
-    UNION ALL SELECT 'clients', COUNT(*) FROM clients
-    UNION ALL SELECT 'payments', COUNT(*) FROM payments
-    UNION ALL SELECT 'staff', COUNT(*) FROM users WHERE role_id IN (1,2)
-  `);
-  const map = Object.fromEntries(counts.map((r) => [r.label, r.value]));
+  const { data: staffRoles, error: rolesError } = await supabase
+    .from('roles')
+    .select('id')
+    .in('name', ['SUPER_ADMIN', 'STAFF']);
+  if (rolesError) throw rolesError;
+  const staffRoleIds = (staffRoles ?? []).map((r: { id: number }) => r.id);
 
-  const todayBookings = await query<any>(`
-    SELECT b.id, b.ref, c.full_name, v.reg_no, b.pickup_at, b.status
-    FROM bookings b
-    JOIN clients c ON c.id = b.client_id
-    JOIN vehicles v ON v.id = b.vehicle_id
-    WHERE DATE(b.pickup_at) = CURDATE()
-    ORDER BY b.pickup_at ASC
-    LIMIT 5
-  `);
+  const [bookingsRes, vehiclesRes, clientsRes, paymentsRes, staffRes] = await Promise.all([
+    supabase.from('bookings').select('id', { count: 'exact', head: true }),
+    supabase.from('vehicles').select('id', { count: 'exact', head: true }),
+    supabase.from('clients').select('id', { count: 'exact', head: true }),
+    supabase.from('payments').select('id', { count: 'exact', head: true }),
+    supabase.from('users').select('id', { count: 'exact', head: true }).in('role_id', staffRoleIds.length ? staffRoleIds : [-1]),
+  ]);
+  for (const res of [bookingsRes, vehiclesRes, clientsRes, paymentsRes, staffRes]) {
+    if (res.error) throw res.error;
+  }
+  const map: Record<string, number> = {
+    bookings: bookingsRes.count ?? 0,
+    vehicles: vehiclesRes.count ?? 0,
+    clients: clientsRes.count ?? 0,
+    payments: paymentsRes.count ?? 0,
+    staff: staffRes.count ?? 0,
+  };
 
-  const recentPayments = await query<any>(`
-    SELECT p.id, p.txn_id, p.amount, p.method, p.status, p.paid_at, c.full_name
-    FROM payments p
-    JOIN clients c ON c.id = p.client_id
-    ORDER BY p.created_at DESC
-    LIMIT 5
-  `);
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+
+  const { data: todayData, error: todayError } = await supabase
+    .from('bookings')
+    .select('id, ref, pickup_at, status, clients!inner(full_name), vehicles!inner(reg_no)')
+    .gte('pickup_at', dayStart.toISOString())
+    .lt('pickup_at', dayEnd.toISOString())
+    .order('pickup_at', { ascending: true })
+    .limit(5);
+  if (todayError) throw todayError;
+  const todayBookings = (todayData ?? []) as unknown as TodayBookingRow[];
+
+  const { data: paymentsData, error: paymentsError } = await supabase
+    .from('payments')
+    .select('id, txn_id, amount, method, status, paid_at, clients!inner(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+  if (paymentsError) throw paymentsError;
+  const recentPayments = (paymentsData ?? []) as unknown as RecentPaymentRow[];
 
   return (
     <div>
@@ -56,14 +96,18 @@ export default async function DashboardPage() {
               <tr><th className="px-5 py-2 text-left">Ref</th><th className="px-5 py-2 text-left">Client</th><th className="px-5 py-2 text-left">Vehicle</th><th className="px-5 py-2 text-left">Status</th></tr>
             </thead>
             <tbody>
-              {todayBookings.map((b) => (
-                <tr key={b.id} className="border-t border-slate-100">
-                  <td className="px-5 py-2 font-medium text-slate-700">{b.ref}</td>
-                  <td className="px-5 py-2 text-slate-600">{b.full_name}</td>
-                  <td className="px-5 py-2 text-slate-600">{b.reg_no}</td>
-                  <td className="px-5 py-2"><StatusBadge status={b.status} /></td>
-                </tr>
-              ))}
+              {todayBookings.map((b) => {
+                const client = Array.isArray(b.clients) ? b.clients[0] : b.clients;
+                const vehicle = Array.isArray(b.vehicles) ? b.vehicles[0] : b.vehicles;
+                return (
+                  <tr key={b.id} className="border-t border-slate-100">
+                    <td className="px-5 py-2 font-medium text-slate-700">{b.ref}</td>
+                    <td className="px-5 py-2 text-slate-600">{client?.full_name}</td>
+                    <td className="px-5 py-2 text-slate-600">{vehicle?.reg_no}</td>
+                    <td className="px-5 py-2"><StatusBadge status={b.status} /></td>
+                  </tr>
+                );
+              })}
               {todayBookings.length === 0 && <tr><td colSpan={4} className="px-5 py-4 text-slate-400">No pickups today.</td></tr>}
             </tbody>
           </table>
@@ -76,14 +120,17 @@ export default async function DashboardPage() {
               <tr><th className="px-5 py-2 text-left">Txn</th><th className="px-5 py-2 text-left">Client</th><th className="px-5 py-2 text-right">Amount</th><th className="px-5 py-2 text-left">Status</th></tr>
             </thead>
             <tbody>
-              {recentPayments.map((p) => (
-                <tr key={p.id} className="border-t border-slate-100">
-                  <td className="px-5 py-2 font-medium text-slate-700">{p.txn_id}</td>
-                  <td className="px-5 py-2 text-slate-600">{p.full_name}</td>
-                  <td className="px-5 py-2 text-right text-slate-700">{money(p.amount)}</td>
-                  <td className="px-5 py-2"><StatusBadge status={p.status} /></td>
-                </tr>
-              ))}
+              {recentPayments.map((p) => {
+                const client = Array.isArray(p.clients) ? p.clients[0] : p.clients;
+                return (
+                  <tr key={p.id} className="border-t border-slate-100">
+                    <td className="px-5 py-2 font-medium text-slate-700">{p.txn_id}</td>
+                    <td className="px-5 py-2 text-slate-600">{client?.full_name}</td>
+                    <td className="px-5 py-2 text-right text-slate-700">{money(p.amount)}</td>
+                    <td className="px-5 py-2"><StatusBadge status={p.status} /></td>
+                  </tr>
+                );
+              })}
               {recentPayments.length === 0 && <tr><td colSpan={4} className="px-5 py-4 text-slate-400">No payments yet.</td></tr>}
             </tbody>
           </table>

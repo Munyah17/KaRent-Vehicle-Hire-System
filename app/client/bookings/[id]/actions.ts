@@ -1,13 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { pool, one, run } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { getSession } from '@/lib/auth';
 import { money } from '@/lib/helpers';
 import {
   findClientBooking,
   bookingOutstanding,
-  nextTxnId,
   notifyStaff,
   notifyUser,
 } from '@/components/client/data';
@@ -16,11 +15,13 @@ import type { ActionState } from '../../actions';
 async function requireClientCtx() {
   const user = await getSession();
   if (!user || user.role !== 'CLIENT') return null;
-  const client = await one<{ id: number; user_id: number; full_name: string; email: string | null }>(
-    'SELECT id, user_id, full_name, email FROM clients WHERE user_id = ?',
-    [user.id]
-  );
-  return client ? { user, client } : null;
+  const { data: client, error } = await supabase
+    .from('clients')
+    .select('id, user_id, full_name, email')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) return null;
+  return client ? { user, client: client as { id: number; user_id: number; full_name: string; email: string | null } } : null;
 }
 
 export async function requestExtensionAction(prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -38,8 +39,8 @@ export async function requestExtensionAction(prev: ActionState, formData: FormDa
     return { error: 'Extensions only apply to active/confirmed bookings.' };
   }
 
-  const newReturn = `${dateStr} ${timeStr || '17:00'}:00`;
-  const newTs = new Date(newReturn.replace(' ', 'T'));
+  const newReturn = `${dateStr}T${timeStr || '17:00'}:00`;
+  const newTs = new Date(newReturn);
   const oldTs = new Date(String(b.return_at).replace(' ', 'T'));
   if (isNaN(newTs.getTime()) || newTs <= oldTs) {
     return { error: 'New return date must be later than the current return date.' };
@@ -48,11 +49,15 @@ export async function requestExtensionAction(prev: ActionState, formData: FormDa
   const days = Math.ceil((newTs.getTime() - oldTs.getTime()) / 86400000);
   const additional = Math.round(days * Number(b.daily_rate) * 100) / 100;
 
-  await run(
-    `INSERT INTO booking_extensions (booking_id, old_return_at, new_return_at, additional_amount, requested_by)
-     VALUES (?,?,?,?,?)`,
-    [bookingId, b.return_at, newReturn, additional, ctx.user.id]
-  );
+  const { error } = await supabase.from('booking_extensions').insert({
+    booking_id: bookingId,
+    old_return_at: b.return_at,
+    new_return_at: newReturn,
+    additional_amount: additional,
+    requested_by: ctx.user.id,
+  });
+  if (error) return { error: 'Could not request extension. Please try again.' };
+
   await notifyStaff(
     'extension',
     `Extension requested ${b.ref}`,
@@ -64,6 +69,50 @@ export async function requestExtensionAction(prev: ActionState, formData: FormDa
   return { ok: true, success: `Extension requested — pending approval. Extra cost: ${money(additional)}` };
 }
 
+/*
+ * Expected secure PostgreSQL RPC for atomic wallet payments.
+ * Schema agent must create:
+ *
+ * CREATE OR REPLACE FUNCTION public.pay_booking_from_wallet(
+ *   p_client_id integer,
+ *   p_booking_id integer,
+ *   p_amount numeric
+ * ) RETURNS TABLE(payment_id integer, txn_id text, wallet_ref text)
+ * LANGUAGE plpgsql
+ * SECURITY DEFINER
+ * AS $$
+ *   DECLARE
+ *     v_wallet_id integer;
+ *     v_balance numeric;
+ *     v_txn_id text;
+ *     v_ref text;
+ *     v_payment_id integer;
+ *   BEGIN
+ *     INSERT INTO public.wallets (client_id) VALUES (p_client_id)
+ *       ON CONFLICT (client_id) DO NOTHING;
+ *
+ *     SELECT id INTO v_wallet_id FROM public.wallets WHERE client_id = p_client_id FOR UPDATE;
+ *     IF v_wallet_id IS NULL THEN RAISE EXCEPTION 'no wallet'; END IF;
+ *
+ *     SELECT COALESCE(SUM(amount),0) INTO v_balance
+ *     FROM public.wallet_transactions WHERE wallet_id = v_wallet_id;
+ *     IF v_balance < p_amount THEN RAISE EXCEPTION 'insufficient wallet balance'; END IF;
+ *
+ *     v_txn_id := public.next_txn_id();
+ *     v_ref := 'WT-' || gen_random_uuid();
+ *
+ *     INSERT INTO public.wallet_transactions (wallet_id, ref, type, amount, description, booking_id)
+ *     VALUES (v_wallet_id, v_ref, 'booking_payment', -p_amount,
+ *             'Payment ' || (SELECT ref FROM public.bookings WHERE id = p_booking_id), p_booking_id);
+ *
+ *     INSERT INTO public.payments (txn_id, booking_id, client_id, amount, method, purpose, status, paid_at)
+ *     VALUES (v_txn_id, p_booking_id, p_client_id, p_amount, 'wallet', 'rental', 'successful', now())
+ *     RETURNING id INTO v_payment_id;
+ *
+ *     RETURN QUERY SELECT v_payment_id, v_txn_id, v_ref;
+ *   END;
+ * $$;
+ */
 export async function payWalletAction(prev: ActionState, formData: FormData): Promise<ActionState> {
   const ctx = await requireClientCtx();
   if (!ctx) return { error: 'Please sign in again.' };
@@ -81,52 +130,33 @@ export async function payWalletAction(prev: ActionState, formData: FormData): Pr
     return { error: 'Invalid payment amount.' };
   }
 
-  const conn = await pool().getConnection();
-  let paymentId = 0;
-  try {
-    await conn.beginTransaction();
+  const { data, error } = await supabase
+    .rpc('pay_booking_from_wallet', {
+      p_client_id: ctx.client.id,
+      p_booking_id: bookingId,
+      p_amount: amount,
+    })
+    .single();
 
-    await conn.execute('INSERT IGNORE INTO wallets (client_id) VALUES (?)', [ctx.client.id]);
-    const [wRows] = await conn.execute('SELECT id FROM wallets WHERE client_id = ? FOR UPDATE', [ctx.client.id]);
-    const walletId = (wRows as { id: number }[])[0]?.id;
-    if (!walletId) throw new Error('no wallet');
-
-    const [bRows] = await conn.execute(
-      'SELECT COALESCE(SUM(amount),0) AS s FROM wallet_transactions WHERE wallet_id = ?',
-      [walletId]
-    );
-    const balance = Number((bRows as { s: string }[])[0]?.s ?? 0);
-    if (balance < amount) {
-      await conn.rollback();
-      return { error: 'Insufficient wallet balance.' };
-    }
-
-    const wref = 'WT-' + Math.random().toString(36).slice(2, 12).toUpperCase();
-    await conn.execute(
-      `INSERT INTO wallet_transactions (wallet_id, ref, type, amount, description, booking_id)
-       VALUES (?,?,?,?,?,?)`,
-      [walletId, wref, 'booking_payment', -Math.abs(amount), `Payment ${b.ref}`, bookingId]
-    );
-
-    const txn = await nextTxnId();
-    const [res] = await conn.execute(
-      `INSERT INTO payments (txn_id, booking_id, client_id, amount, method, purpose, status, paid_at)
-       VALUES (?,?,?,?,'wallet','rental','successful',NOW())`,
-      [txn, bookingId, ctx.client.id, amount]
-    );
-    paymentId = (res as { insertId: number }).insertId;
-    await conn.commit();
-  } catch {
-    try { await conn.rollback(); } catch {}
-    return { error: 'Could not record payment.' };
-  } finally {
-    conn.release();
+  if (error || !data) {
+    return { error: error?.message || 'Could not record payment.' };
   }
 
-  await run(
-    "INSERT INTO audit_logs (user_id, action, module, record_type, record_id, new_value) VALUES (?,?,?,?,?,?)",
-    [ctx.user.id, 'record_payment', 'payments', 'payment', paymentId, JSON.stringify({ amount, method: 'wallet', purpose: 'rental', booking_id: bookingId })]
-  ).catch(() => {});
+  const { payment_id: paymentId } = data as { payment_id: number; txn_id: string; wallet_ref: string };
+
+  const { error: auditErr } = await supabase.from('audit_logs').insert({
+    user_id: ctx.user.id,
+    action: 'record_payment',
+    module: 'payments',
+    record_type: 'payment',
+    record_id: paymentId,
+    new_value: JSON.stringify({ amount, method: 'wallet', purpose: 'rental', booking_id: bookingId }),
+  });
+  if (auditErr) {
+    // Audit logging failure must not break the confirmed payment; surface in server logs only.
+    console.error('audit log failed', auditErr.message);
+  }
+
   await notifyUser(
     ctx.user.id,
     'payment',

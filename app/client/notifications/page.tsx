@@ -1,6 +1,6 @@
 import { revalidatePath } from 'next/cache';
 import { Bell } from 'lucide-react';
-import { run } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { fmtDateTime } from '@/lib/helpers';
 import { requireClient, listNotifications } from '@/components/client/data';
 
@@ -13,7 +13,12 @@ export default async function NotificationsPage() {
   async function markAllRead() {
     'use server';
     const ctx = await requireClient();
-    await run("UPDATE notifications SET status = 'read' WHERE user_id = ? AND status = 'unread'", [ctx.user.id]);
+    const { error } = await supabase
+      .from('notifications')
+      .update({ status: 'read' })
+      .eq('user_id', ctx.user.id)
+      .eq('status', 'unread');
+    if (error) throw new Error(`markAllRead: ${error.message}`);
     revalidatePath('/client/notifications');
     revalidatePath('/client');
   }

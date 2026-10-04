@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { setting } from '@/lib/settings';
-import { query, one } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { getVehicle, getPrimaryPhoto, daysBetween, computeTotal, formatCurrency, Vehicle, VehiclePhoto } from '@/components/public/data';
 import SearchForm from '@/components/public/SearchForm';
 import { Fuel, Gauge, Users, Calendar, ArrowLeft } from 'lucide-react';
@@ -30,24 +30,36 @@ export default async function VehicleDetailPage({
 
   const [photo, photos] = await Promise.all([
     getPrimaryPhoto(vehicle.id),
-    query<VehiclePhoto>('SELECT file_path, is_primary FROM vehicle_photos WHERE vehicle_id = ? AND is_public = 1 ORDER BY is_primary DESC, sort_order ASC', [vehicle.id]),
+    supabase
+      .from('vehicle_photos')
+      .select('file_path, is_primary')
+      .eq('vehicle_id', vehicle.id)
+      .eq('is_public', true)
+      .order('is_primary', { ascending: false })
+      .order('sort_order', { ascending: true })
+      .returns<VehiclePhoto[]>(),
   ]);
+
+  if (photos.error) throw photos.error;
 
   const days = sp.pickup && sp.return ? daysBetween(sp.pickup, sp.return) : null;
   const total = days !== null ? computeTotal(vehicle, days) : null;
 
   let available = true;
   if (sp.pickup && sp.return) {
-    const overlap = await one<{ c: number }>(
-      `SELECT COUNT(*) AS c FROM bookings
-       WHERE vehicle_id = ? AND status IN ('confirmed','active','pending')
-         AND pickup_at < ? AND return_at > ?`,
-      [vehicle.id, `${sp.return} 00:00:00`, `${sp.pickup} 00:00:00`]
-    );
-    available = (overlap?.c ?? 0) === 0;
+    const { count, error } = await supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('vehicle_id', vehicle.id)
+      .in('status', ['confirmed', 'active', 'pending'])
+      .lt('pickup_at', `${sp.return} 00:00:00`)
+      .gt('return_at', `${sp.pickup} 00:00:00`);
+
+    if (error) throw error;
+    available = (count ?? 0) === 0;
   }
 
-  const gallery = photos.length ? photos.map((p) => `/uploads/${p.file_path}`) : [photo];
+  const gallery = (photos.data ?? []).length ? (photos.data ?? []).map((p) => `/uploads/${p.file_path}`) : [photo];
 
   return (
     <main>

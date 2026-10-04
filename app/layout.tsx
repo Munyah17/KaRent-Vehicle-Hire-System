@@ -5,6 +5,8 @@ import './globals.css';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const name = await setting('company_name', 'KaRent');
   return {

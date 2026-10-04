@@ -2,12 +2,26 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
-import { one, run } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { getSession, COOKIE } from '@/lib/auth';
 import LoginForm from '@/components/admin/LoginForm';
 
 function normalizeHash(h: string): string {
   return h.replace(/^\$2y\$/, '$2a$');
+}
+
+/** Strip characters that would break a PostgREST `or` filter expression. */
+function orSafe(value: string): string {
+  return value.replace(/[(),.\\"]/g, '');
+}
+
+interface AdminUserRow {
+  id: number;
+  name: string;
+  email: string;
+  password_hash: string;
+  status: string;
+  roles: { name: string } | { name: string }[] | null;
 }
 
 export default async function AdminLoginPage({ searchParams }: { searchParams?: Promise<{ from?: string }> }) {
@@ -25,23 +39,40 @@ export default async function AdminLoginPage({ searchParams }: { searchParams?: 
     const rawFrom = String(formData.get('from') ?? '/admin/dashboard');
     const from = rawFrom.startsWith('/admin/') ? rawFrom : '/admin/dashboard';
 
-    const user = await one<any>(
-      `SELECT u.id, u.name, u.email, u.password_hash, u.status, r.name AS role
-       FROM users u JOIN roles r ON r.id = u.role_id
-       WHERE (u.email = ? OR u.username = ?) LIMIT 1`,
-      [identifier, identifier]
-    );
+    let user: AdminUserRow | null = null;
+    const safeIdentifier = orSafe(identifier);
+    if (safeIdentifier) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email, password_hash, status, roles(name)')
+        .or(`email.eq."${safeIdentifier}",username.eq."${safeIdentifier}"`)
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      user = data as unknown as AdminUserRow | null;
+    }
 
-    const ok = user && user.status === 'active' && bcrypt.compareSync(password, normalizeHash(user.password_hash));
-    await run('INSERT INTO login_attempts (email, ip, successful) VALUES (?, ?, ?)', [identifier, '', ok ? 1 : 0]);
+    const ok = !!user && user.status === 'active' && bcrypt.compareSync(password, normalizeHash(user.password_hash));
 
-    if (!ok || !['SUPER_ADMIN', 'STAFF'].includes(user.role)) {
+    const { error: attemptError } = await supabase
+      .from('login_attempts')
+      .insert({ email: identifier, ip: '', successful: ok });
+    if (attemptError) throw attemptError;
+
+    const rolesData = user?.roles;
+    const role = Array.isArray(rolesData) ? rolesData[0]?.name : rolesData?.name;
+
+    if (!ok || !user || !['SUPER_ADMIN', 'STAFF'].includes(role ?? '')) {
       redirect('/admin/login?error=1');
     }
 
-    await run('UPDATE users SET last_login_at = NOW() WHERE id = ?', [user.id]);
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ last_login_at: new Date().toISOString() })
+      .eq('id', user.id);
+    if (updateError) throw updateError;
 
-    const token = await new SignJWT({ id: user.id, name: user.name, email: user.email, role: user.role })
+    const token = await new SignJWT({ id: user.id, name: user.name, email: user.email, role })
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('7d')

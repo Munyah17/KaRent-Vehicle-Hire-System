@@ -1,6 +1,6 @@
 'use server';
 
-import { query, run } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { headers } from 'next/headers';
 
 export type ContactState = { success?: boolean; error?: string } | null;
@@ -16,20 +16,45 @@ export async function submitContact(prev: ContactState, formData: FormData): Pro
   }
 
   try {
-    const staff = await query<{ id: number }>(
-      "SELECT u.id FROM users u JOIN roles r ON r.id = u.role_id WHERE r.code IN ('SUPER_ADMIN','STAFF') AND u.status = 'active'"
-    );
+    const { data: roles, error: rolesError } = await supabase
+      .from('roles')
+      .select('id')
+      .in('code', ['SUPER_ADMIN', 'STAFF']);
+
+    if (rolesError) throw rolesError;
+
+    const roleIds = (roles ?? []).map((r) => r.id);
+    if (roleIds.length === 0) {
+      return { success: true };
+    }
+
+    const { data: staff, error: staffError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('status', 'active')
+      .in('role_id', roleIds);
+
+    if (staffError) throw staffError;
 
     const title = `Website enquiry: ${subject}`;
     const body = `${name} (${email}): ${message}`;
     const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim() || '';
     const link = `/admin/support`;
 
-    for (const s of staff) {
-      await run(
-        'INSERT INTO notifications (user_id, client_id, type, title, body, link, channel, status) VALUES (?, 1, ?, ?, ?, ?, ?, ?)',
-        [s.id, 'enquiry', title, body, link, 'in_app', 'unread']
-      );
+    const notifications = (staff ?? []).map((s) => ({
+      user_id: s.id,
+      client_id: 1,
+      type: 'enquiry',
+      title,
+      body,
+      link,
+      channel: 'in_app',
+      status: 'unread',
+    }));
+
+    if (notifications.length > 0) {
+      const { error: insertError } = await supabase.from('notifications').insert(notifications);
+      if (insertError) throw insertError;
     }
 
     return { success: true };

@@ -1,4 +1,4 @@
-import { query, one } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export type Vehicle = {
   id: number;
@@ -23,6 +23,29 @@ export type Vehicle = {
   created_at: string;
 };
 
+type DbVehicle = {
+  id: number;
+  reg_no: string;
+  make: string;
+  model: string;
+  year: number | null;
+  colour: string | null;
+  transmission: string;
+  fuel_type: string;
+  engine_capacity: string | null;
+  seats: number;
+  mileage: number;
+  description: string | null;
+  daily_rate: number;
+  weekly_rate: number | null;
+  monthly_rate: number | null;
+  deposit: number;
+  status: string;
+  is_public: boolean;
+  is_featured: boolean;
+  created_at: string;
+};
+
 export type VehiclePhoto = {
   id: number;
   vehicle_id: number;
@@ -30,23 +53,56 @@ export type VehiclePhoto = {
   is_primary: number;
 };
 
+function toVehicle(row: DbVehicle): Vehicle {
+  return {
+    ...row,
+    is_public: row.is_public ? 1 : 0,
+    is_featured: row.is_featured ? 1 : 0,
+  };
+}
+
 export async function getPrimaryPhoto(vehicleId: number): Promise<string> {
-  const row = await one<VehiclePhoto>(
-    'SELECT file_path, is_primary FROM vehicle_photos WHERE vehicle_id = ? AND is_public = 1 ORDER BY is_primary DESC, sort_order ASC LIMIT 1',
-    [vehicleId]
-  );
-  if (!row) return '/assets/img/car-placeholder.jpg';
-  return `/uploads/${row.file_path}`;
+  const { data, error } = await supabase
+    .from('vehicle_photos')
+    .select('file_path, is_primary')
+    .eq('vehicle_id', vehicleId)
+    .eq('is_public', true)
+    .order('is_primary', { ascending: false })
+    .order('sort_order', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return '/assets/img/car-placeholder.jpg';
+  return `/uploads/${data.file_path}`;
 }
 
 export async function getVehicle(id: number): Promise<Vehicle | null> {
-  return one<Vehicle>('SELECT * FROM vehicles WHERE id = ? AND is_public = 1', [id]);
+  const { data, error } = await supabase
+    .from('vehicles')
+    .select('*')
+    .eq('id', id)
+    .eq('is_public', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  return toVehicle(data as DbVehicle);
 }
 
 export async function listVehicles(filters?: { pickup?: string; return?: string }): Promise<Vehicle[]> {
-  const rows = await query<Vehicle>(
-    "SELECT * FROM vehicles WHERE is_public = 1 AND status NOT IN ('maintenance','unavailable') ORDER BY is_featured DESC, daily_rate"
-  );
+  const { data, error } = await supabase
+    .from('vehicles')
+    .select('*')
+    .eq('is_public', true)
+    .in('status', ['available', 'reserved', 'on_hire'])
+    .order('is_featured', { ascending: false })
+    .order('daily_rate', { ascending: true })
+    .returns<DbVehicle[]>();
+
+  if (error) throw error;
+  const rows = (data ?? []).map(toVehicle);
+
   if (!filters?.pickup || !filters?.return) return rows;
 
   const pickup = new Date(filters.pickup);
@@ -58,13 +114,16 @@ export async function listVehicles(filters?: { pickup?: string; return?: string 
 
   const available: Vehicle[] = [];
   for (const v of rows) {
-    const overlap = await one<{ c: number }>(
-      `SELECT COUNT(*) AS c FROM bookings
-       WHERE vehicle_id = ? AND status IN ('confirmed','active','pending')
-         AND pickup_at < ? AND return_at > ?`,
-      [v.id, `${r} 00:00:00`, `${p} 00:00:00`]
-    );
-    if ((overlap?.c ?? 0) === 0) available.push(v);
+    const { count, error: countError } = await supabase
+      .from('bookings')
+      .select('id', { count: 'exact', head: true })
+      .eq('vehicle_id', v.id)
+      .in('status', ['confirmed', 'active', 'pending'])
+      .lt('pickup_at', `${r} 00:00:00`)
+      .gt('return_at', `${p} 00:00:00`);
+
+    if (countError) throw countError;
+    if ((count ?? 0) === 0) available.push(v);
   }
   return available;
 }

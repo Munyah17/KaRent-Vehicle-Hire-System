@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { one } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { setting } from '@/lib/settings';
 import { fmtDateTime } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
@@ -12,21 +12,28 @@ export const metadata = { title: 'Document' };
 export default async function ContractPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { client } = await requireClient();
-  const contract = await one<Contract>(
-    `SELECT ct.*, b.ref AS booking_ref FROM contracts ct
-     JOIN bookings b ON b.id = ct.booking_id
-     WHERE ct.id = ? AND ct.client_id = ?`,
-    [Number(id), client.id]
-  );
+
+  const { data: contract, error: contractErr } = await supabase
+    .from('contracts')
+    .select('*, bookings!inner(ref)')
+    .eq('id', Number(id))
+    .eq('client_id', client.id)
+    .maybeSingle();
+  if (contractErr) throw new Error(`contract: ${contractErr.message}`);
   if (!contract) notFound();
 
-  const [company, sig] = await Promise.all([
-    setting('company_name', 'KaRent'),
-    one<{ signer_name: string; signature_data: string | null; signed_at: string }>(
-      'SELECT signer_name, signature_data, signed_at FROM signatures WHERE contract_id = ? ORDER BY id DESC LIMIT 1',
-      [contract.id]
-    ),
-  ]);
+  const typedContract = contract as unknown as Contract & { bookings: { ref: string } };
+
+  const { data: sig, error: sigErr } = await supabase
+    .from('signatures')
+    .select('signer_name, signature_data, signed_at')
+    .eq('contract_id', typedContract.id)
+    .order('id', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (sigErr) throw new Error(`signatures: ${sigErr.message}`);
+
+  const [company] = await Promise.all([setting('company_name', 'KaRent')]);
 
   return (
     <div className="cp-doc">
@@ -35,10 +42,10 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
       </div>
       <div className="cp-doc-paper">
         <div className="cp-doc-meta">
-          <span>{company} · {contract.title} · v{contract.template_version}</span>
-          <Badge status={contract.status} />
+          <span>{company} · {typedContract.title} · v{typedContract.template_version}</span>
+          <Badge status={typedContract.status} />
         </div>
-        <div className="cp-doc-body" dangerouslySetInnerHTML={{ __html: contract.body }} />
+        <div className="cp-doc-body" dangerouslySetInnerHTML={{ __html: typedContract.body }} />
         {sig && (
           <div className="cp-doc-sig">
             <p style={{ margin: 0, fontWeight: 700 }}>Signed by: {sig.signer_name}</p>

@@ -1,31 +1,53 @@
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDate, Badge } from '@/lib/helpers';
+
+interface PaymentRow {
+  id: number;
+  txn_id: string;
+  amount: number;
+  method: string;
+  purpose: string;
+  status: string;
+  paid_at: string | null;
+  created_at: string;
+  clients: { full_name: string } | { full_name: string }[] | null;
+}
+
+/** Strip characters that would break a PostgREST `or` filter expression. */
+function orSafe(value: string): string {
+  return value.replace(/[(),\\"]/g, '');
+}
 
 export default async function PaymentsPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const status = (params?.status ?? '').trim();
 
-  let where = 'WHERE 1=1';
-  const args: any[] = [];
+  let qb = supabase
+    .from('payments')
+    .select('id, txn_id, amount, method, purpose, status, paid_at, created_at, clients!inner(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(200);
+
   if (q) {
-    where += ' AND (p.txn_id LIKE ? OR c.full_name LIKE ?)';
-    args.push(`%${q}%`, `%${q}%`);
+    const pat = `%${orSafe(q)}%`;
+    const { data: clientRows, error: clientsError } = await supabase
+      .from('clients')
+      .select('id')
+      .ilike('full_name', pat);
+    if (clientsError) throw clientsError;
+    const clientIds = (clientRows ?? []).map((r: { id: number }) => r.id);
+    const ors = [`txn_id.ilike.${pat}`];
+    if (clientIds.length) ors.push(`client_id.in.(${clientIds.join(',')})`);
+    qb = qb.or(ors.join(','));
   }
   if (status) {
-    where += ' AND p.status = ?';
-    args.push(status);
+    qb = qb.eq('status', status);
   }
 
-  const rows = await query<any>(`
-    SELECT p.id, p.txn_id, p.amount, p.method, p.purpose, p.status, p.paid_at, p.created_at,
-           c.full_name AS client
-    FROM payments p
-    JOIN clients c ON c.id = p.client_id
-    ${where}
-    ORDER BY p.created_at DESC
-    LIMIT 200
-  `, args);
+  const { data, error } = await qb;
+  if (error) throw error;
+  const rows = (data ?? []) as unknown as PaymentRow[];
 
   const statuses = ['pending', 'successful', 'failed', 'cancelled', 'refunded'];
 
@@ -57,17 +79,20 @@ export default async function PaymentsPage({ searchParams }: { searchParams?: Pr
             </tr>
           </thead>
           <tbody>
-            {rows.map((p) => (
-              <tr key={p.id} className="border-t border-slate-100 hover:bg-slate-50">
-                <td className="px-5 py-3 font-medium text-slate-700">{p.txn_id}</td>
-                <td className="px-5 py-3 text-slate-600">{p.client}</td>
-                <td className="px-5 py-3 text-slate-600">{p.method}</td>
-                <td className="px-5 py-3 text-slate-600">{p.purpose}</td>
-                <td className="px-5 py-3 text-right text-slate-700">{money(p.amount)}</td>
-                <td className="px-5 py-3"><Badge status={p.status} /></td>
-                <td className="px-5 py-3 text-slate-600">{fmtDate(p.paid_at)}</td>
-              </tr>
-            ))}
+            {rows.map((p) => {
+              const client = Array.isArray(p.clients) ? p.clients[0] : p.clients;
+              return (
+                <tr key={p.id} className="border-t border-slate-100 hover:bg-slate-50">
+                  <td className="px-5 py-3 font-medium text-slate-700">{p.txn_id}</td>
+                  <td className="px-5 py-3 text-slate-600">{client?.full_name}</td>
+                  <td className="px-5 py-3 text-slate-600">{p.method}</td>
+                  <td className="px-5 py-3 text-slate-600">{p.purpose}</td>
+                  <td className="px-5 py-3 text-right text-slate-700">{money(p.amount)}</td>
+                  <td className="px-5 py-3"><Badge status={p.status} /></td>
+                  <td className="px-5 py-3 text-slate-600">{fmtDate(p.paid_at)}</td>
+                </tr>
+              );
+            })}
             {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-6 text-slate-400">No payments found.</td></tr>}
           </tbody>
         </table>

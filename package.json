@@ -2,19 +2,19 @@
   "name": "karent-vehicle-hire",
   "version": "1.0.0",
   "private": true,
-  "description": "KaRent - Vehicle Hire Management System (Next.js + MySQL)",
+  "description": "KaRent - Vehicle Hire Management System (Next.js + Supabase)",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "next lint",
-    "db:setup": "node scripts/setup-db.mjs"
+    "db:reset": "supabase db reset"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "bcryptjs": "^2.4.3",
     "jose": "^5.9.6",
     "lucide-react": "^0.462.0",
-    "mysql2": "^3.11.4",
     "next": "^15.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

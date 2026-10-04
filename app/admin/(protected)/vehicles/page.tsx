@@ -1,29 +1,49 @@
-import { query } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { money, fmtDate, Badge } from '@/lib/helpers';
+
+interface VehicleRow {
+  id: number;
+  reg_no: string;
+  make: string;
+  model: string;
+  year: number | null;
+  colour: string | null;
+  transmission: string;
+  fuel_type: string;
+  seats: number;
+  daily_rate: number;
+  status: string;
+  is_public: boolean;
+}
+
+/** Strip characters that would break a PostgREST `or` filter expression. */
+function orSafe(value: string): string {
+  return value.replace(/[(),\\"]/g, '');
+}
 
 export default async function VehiclesPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const status = (params?.status ?? '').trim();
 
-  let where = 'WHERE 1=1';
-  const args: any[] = [];
+  let qb = supabase
+    .from('vehicles')
+    .select('id, reg_no, make, model, year, colour, transmission, fuel_type, seats, daily_rate, status, is_public')
+    .order('make')
+    .order('model')
+    .limit(200);
+
   if (q) {
-    where += ' AND (reg_no LIKE ? OR make LIKE ? OR model LIKE ?)';
-    args.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    const pat = orSafe(q);
+    qb = qb.or(`reg_no.ilike.%${pat}%,make.ilike.%${pat}%,model.ilike.%${pat}%`);
   }
   if (status) {
-    where += ' AND status = ?';
-    args.push(status);
+    qb = qb.eq('status', status);
   }
 
-  const rows = await query<any>(`
-    SELECT id, reg_no, make, model, year, colour, transmission, fuel_type, seats, daily_rate, status, is_public
-    FROM vehicles
-    ${where}
-    ORDER BY make, model
-    LIMIT 200
-  `, args);
+  const { data, error } = await qb;
+  if (error) throw error;
+  const rows = (data ?? []) as VehicleRow[];
 
   const statuses = ['available', 'reserved', 'on_hire', 'maintenance', 'unavailable'];
 
