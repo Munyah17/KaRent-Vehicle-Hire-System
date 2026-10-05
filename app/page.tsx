@@ -103,6 +103,8 @@ export default async function HomePage() {
     suv: ['SUVs & 4x4s', 'car-front', 'Space, ground clearance and all-road confidence.'],
     premium: ['Premium Vehicles', 'sparkles', 'Executive and luxury models for special occasions.'],
     truck: ['Trucks & Pickups', 'truck', 'Load-moving pickups and trucks for work crews.'],
+    utility: ['People Movers & Vans', 'bus', 'Minibuses and 7-seaters for groups, staff and events.'],
+    pool: ['Pool Vehicles', 'key-round', 'Shared fleet cars — first-come, first-served.'],
   };
 
   const byCategory: Record<string, DbVehicle[]> = {};
