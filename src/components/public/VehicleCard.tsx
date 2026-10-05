@@ -35,12 +35,12 @@ export default function VehicleCard({
   const inquireUrl = `/contact?subject=${encodeURIComponent(subject)}`;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
-      <Link href={vehUrl}>
-        <img src={photo} className="w-full h-60 object-cover" alt={`${make} ${model}`} />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
+      <Link href={vehUrl} className="block h-60 shrink-0">
+        <img src={photo} className="w-full h-full object-cover" alt={`${make} ${model}`} />
       </Link>
       <div className="p-4 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-2">
+        <div className="h-6 flex items-center justify-between gap-2">
           <h3 className="font-semibold text-slate-800 leading-6 truncate">
             <Link href={vehUrl} className="hover:text-blue-600">
               {make} {model}
@@ -48,7 +48,7 @@ export default function VehicleCard({
           </h3>
           <StatusBadge status={badgeStatus} />
         </div>
-        <p className="text-xs text-slate-500 mt-1 leading-5 truncate">
+        <p className="h-5 text-xs text-slate-500 mt-1 leading-5 truncate">
           {year ?? '-'} · {transmission.charAt(0).toUpperCase() + transmission.slice(1)} ·{' '}
           {fuel_type.charAt(0).toUpperCase() + fuel_type.slice(1)} · {seats} seats
           {hires !== undefined && hires !== null ? (
@@ -59,20 +59,20 @@ export default function VehicleCard({
           ) : null}
         </p>
         <div className="mt-auto">
-          <p className="text-lg font-semibold text-blue-600 mt-2">
+          <p className="h-7 text-lg font-semibold text-blue-600 mt-2 leading-7 truncate">
             ${rate.toFixed(2)}
             <span className="text-sm font-normal text-slate-400">/day</span>
           </p>
           <div className="flex gap-2 mt-3">
             <Link
               href={inquireUrl}
-              className="flex-1 text-center border border-gray-300 text-slate-700 hover:bg-gray-50 rounded-md px-3 py-2 text-xs font-medium"
+              className="flex-1 h-9 inline-flex items-center justify-center border border-gray-300 text-slate-700 hover:bg-gray-50 rounded-md px-3 text-xs font-medium"
             >
               Inquire
             </Link>
             <Link
               href={vehUrl}
-              className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-xs font-medium"
+              className="flex-1 h-9 inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 text-xs font-medium"
             >
               Book Now
             </Link>
