@@ -25,3 +25,5 @@ vehicle-hire-deploy/
 # OS junk
 Thumbs.db
 Desktop.ini
+
+.env.prod
