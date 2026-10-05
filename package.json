@@ -5,7 +5,8 @@
   "description": "KaRent - Vehicle Hire Management System (Next.js + Supabase)",
   "scripts": {
     "dev": "next dev -p 6333",
-    "build": "next build",
+    "build": "npm run build:css && next build",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i src/css/app.css -o public/assets/css/app.css --minify",
     "start": "next start -p 6333",
     "lint": "next lint",
     "db:reset": "supabase db reset"
