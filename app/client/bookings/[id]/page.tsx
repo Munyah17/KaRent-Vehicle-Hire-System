@@ -97,77 +97,105 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <div className="cp-card">
-        <div className="cp-vehicle-head">
+      <div className="card mb-6">
+        <div className="flex flex-wrap items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photo} alt={`${b.make} ${b.model}`} />
-          <div style={{ flex: 1, minWidth: 220 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0 }}>{b.ref}</h2>
+          <img
+            src={photo}
+            alt={`${b.make} ${b.model}`}
+            className="w-20 h-14 object-cover rounded-lg border border-gray-200"
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-slate-800">{b.ref}</h2>
               <Badge status={b.status} />
             </div>
-            <p className="muted" style={{ margin: '6px 0 0', fontSize: '.88rem' }}>
+            <p className="text-sm text-slate-500">
               {b.make} {b.model} ({b.reg_no}) · {fmtDateTime(b.pickup_at)} → {fmtDateTime(b.return_at)}
             </p>
           </div>
           {canPay && (
-            <div style={{ textAlign: 'right' }}>
-              <div className="muted" style={{ fontSize: '.72rem', textTransform: 'uppercase', letterSpacing: '.05em' }}>Outstanding</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#c0392b' }}>{money(outstanding)}</div>
+            <div className="text-right">
+              <p className="text-xs text-slate-400">Outstanding</p>
+              <p className="text-xl font-semibold text-red-600">{money(outstanding)}</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="cp-grid32">
-        <div>
-          <div className="cp-card">
-            <h3>Financial summary</h3>
-            <dl className="cp-dl">
-              <div className="row"><dt>Rental</dt><dd>{money(b.base_amount)}</dd></div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <div className="card">
+            <h3 className="font-semibold text-slate-800 mb-4">Financial summary</h3>
+            <dl className="text-sm space-y-2.5">
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Rental</dt>
+                <dd className="font-medium">{money(b.base_amount)}</dd>
+              </div>
               {charges.map((c) => (
-                <div className="row" key={c.id}><dt>{c.label}</dt><dd>{money(c.amount)}</dd></div>
+                <div className="flex justify-between" key={c.id}>
+                  <dt className="text-slate-500">{c.label}</dt>
+                  <dd className="font-medium">{money(c.amount)}</dd>
+                </div>
               ))}
-              {!charges.length && Number(b.additional_amount) > 0 && (
-                <div className="row"><dt>Additional charges</dt><dd>{money(b.additional_amount)}</dd></div>
+              {!charges.length && (
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Additional charges</dt>
+                  <dd className="font-medium">{money(b.additional_amount)}</dd>
+                </div>
               )}
-              <div className="row"><dt>Discount</dt><dd style={{ color: '#0a6b52' }}>−{money(b.discount)}</dd></div>
-              <div className="row" style={{ fontWeight: 800 }}><dt style={{ color: 'var(--ink)' }}>Total</dt><dd>{money(b.total)}</dd></div>
-              <div className="row"><dt>Paid</dt><dd style={{ color: '#0a6b52' }}>{money(paid)}</dd></div>
-              <div className="row">
-                <dt>Outstanding</dt>
-                <dd style={{ color: outstanding > 0 ? '#c0392b' : '#0a6b52' }}>{money(outstanding)}</dd>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Discount</dt>
+                <dd className="font-medium text-green-600">−{money(b.discount)}</dd>
+              </div>
+              <div className="flex justify-between border-t border-gray-100 pt-2.5">
+                <dt className="font-semibold">Total</dt>
+                <dd className="font-semibold">{money(b.total)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Paid</dt>
+                <dd className="font-medium text-green-600">{money(paid)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-slate-500">Outstanding</dt>
+                <dd className={`font-semibold ${outstanding > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {money(outstanding)}
+                </dd>
               </div>
               {deposit && (
-                <div className="row">
-                  <dt>Deposit held</dt>
-                  <dd>{money(depositHeld)} <Badge status={deposit.status} /></dd>
+                <div className="flex justify-between border-t border-gray-100 pt-2.5">
+                  <dt className="text-slate-500">Deposit held</dt>
+                  <dd className="font-medium">
+                    {money(depositHeld)} <Badge status={deposit.status} />
+                  </dd>
                 </div>
               )}
             </dl>
           </div>
 
           {canPay && (
-            <div className="cp-card">
-              <h3>Make a payment</h3>
+            <div className="card">
+              <h3 className="font-semibold text-slate-800 mb-4">Make a payment</h3>
               <PayWalletForm bookingId={bookingId} outstanding={outstanding} walletBalance={wallet} />
             </div>
           )}
 
-          <div className="cp-card" id="extend">
-            <h3>Request extension</h3>
+          <div className="card" id="extend">
+            <h3 className="font-semibold text-slate-800 mb-4">Request extension</h3>
             {canExtend ? (
               <ExtensionForm bookingId={bookingId} minDate={minReturn} />
             ) : (
-              <p className="muted" style={{ fontSize: '.9rem' }}>
+              <p className="text-sm text-slate-400">
                 Extensions are available for confirmed and active bookings.
               </p>
             )}
             {extensions.length > 0 && (
-              <ul className="cp-list" style={{ margin: '16px -24px -24px' }}>
+              <ul className="mt-4 space-y-2 text-sm">
                 {extensions.map((x) => (
-                  <li key={x.id}>
-                    <span>{fmtDate(x.new_return_at)} <span className="t">(+{money(x.additional_amount)})</span></span>
+                  <li key={x.id} className="flex items-center justify-between">
+                    <span>
+                      {fmtDate(x.new_return_at)} (+{money(x.additional_amount)})
+                    </span>
                     <Badge status={x.status} />
                   </li>
                 ))}
@@ -176,49 +204,50 @@ export default async function BookingDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        <div>
-          <div className="cp-card">
-            <h3>Documents</h3>
-            {contracts.length ? (
-              <ul className="cp-list" style={{ margin: '0 -24px -24px' }}>
-                {contracts.map((c) => (
-                  <li key={c.id}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                      <FileText size={16} color="#607477" /> {c.title}
-                    </span>
-                    <Link href={`/client/documents/${c.id}`} style={{ color: '#087f70', fontWeight: 600 }}>
-                      View
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted" style={{ fontSize: '.9rem' }}>No documents yet.</p>
-            )}
+        <div className="space-y-6">
+          <div className="card">
+            <h3 className="font-semibold text-slate-800 mb-4">Documents</h3>
+            <ul className="space-y-2 text-sm">
+              {contracts.map((c) => (
+                <li key={c.id} className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-gray-400" />
+                    {c.title}
+                  </span>
+                  <Link
+                    href={`/client/documents/${c.id}`}
+                    target="_blank"
+                    className="text-blue-600 hover:underline"
+                  >
+                    View
+                  </Link>
+                </li>
+              ))}
+              {!contracts.length && <li className="text-slate-400">No documents yet.</li>}
+            </ul>
           </div>
-
-          <div className="cp-card flush">
-            <div className="hd"><h3>Payments</h3></div>
-            {payments.length ? (
-              <ul className="cp-list">
-                {payments.map((p) => (
-                  <li key={p.id}>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 600 }}>{p.txn_id}</p>
-                      <span className="t">
-                        {p.method.replace(/_/g, ' ')} · {fmtDateTime(p.paid_at ?? p.created_at)}
-                      </span>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 700 }}>{money(p.amount)}</div>
-                      <Badge status={p.status} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="cp-empty">No payments yet.</div>
-            )}
+          <div className="card !p-0 overflow-x-auto">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="font-semibold text-slate-800">Payments</h3>
+            </div>
+            <ul className="divide-y divide-gray-100 text-sm">
+              {payments.map((p) => (
+                <li key={p.id} className="px-6 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{p.txn_id}</p>
+                    <p className="text-xs text-slate-400">
+                      {p.method.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} ·{' '}
+                      {fmtDateTime(p.paid_at ?? p.created_at)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{money(p.amount)}</p>
+                    <Badge status={p.status} />
+                  </div>
+                </li>
+              ))}
+              {!payments.length && <li className="px-6 py-6 text-slate-400">No payments yet.</li>}
+            </ul>
           </div>
         </div>
       </div>

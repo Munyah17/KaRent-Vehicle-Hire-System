@@ -114,124 +114,127 @@ export default async function ClientDashboard() {
 
   return (
     <>
-      <h1 className="cp-h1">Welcome back, {firstName}</h1>
-      <p className="cp-sub">
+      <h1 className="text-2xl font-semibold text-slate-800 mb-1">Welcome back, {firstName}</h1>
+      <p className="text-slate-500 text-sm mb-6">
         Account {client.client_no} · KYC <Badge status={client.kyc_status} />
       </p>
 
       {client.kyc_status !== 'verified' && (
-        <div className="cp-alert warn">
+        <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
           Complete your verification to speed up future bookings.{' '}
-          <Link href="/client/profile" style={{ textDecoration: 'underline', fontWeight: 700 }}>
-            Update profile & documents
+          <Link href="/client/profile" className="underline font-medium">
+            Upload documents
           </Link>
         </div>
       )}
 
-      <div className="cp-kpis">
-        <div className="cp-kpi">
-          <div className="row">
-            <div>
-              <div className="l">Wallet balance</div>
-              <div className="v">{money(wallet)}</div>
-            </div>
-            <Wallet size={22} color="#087f70" />
-          </div>
-        </div>
-        <div className="cp-kpi">
-          <div className="row">
-            <div>
-              <div className="l">Outstanding balance</div>
-              <div className={`v${outstanding > 0 ? ' red' : ' green'}`}>{money(outstanding)}</div>
-            </div>
-            <AlertCircle size={22} color={outstanding > 0 ? '#c0392b' : '#08705f'} />
-          </div>
-        </div>
-        <div className="cp-kpi">
-          <div className="row">
-            <div>
-              <div className="l">Deposit held</div>
-              <div className="v">{money(depositHeld)}</div>
-            </div>
-            <PiggyBank size={22} color="#087f70" />
-          </div>
-        </div>
-        <Link href="/vehicles" className="cp-kpi cta">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        <div className="kpi-card">
           <div>
-            <div className="l">Ready for your next trip?</div>
-            <div className="v">Book a vehicle</div>
+            <p className="text-sm text-slate-500">Wallet balance</p>
+            <p className="text-2xl font-semibold mt-1">{money(wallet)}</p>
           </div>
-          <ArrowRight size={22} />
+          <span className="icon-box bg-blue-50 text-blue-600">
+            <Wallet className="w-5 h-5" />
+          </span>
+        </div>
+        <div className="kpi-card">
+          <div>
+            <p className="text-sm text-slate-500">Outstanding balance</p>
+            <p className={`text-2xl font-semibold mt-1 ${outstanding > 0 ? 'text-red-600' : ''}`}>
+              {money(outstanding)}
+            </p>
+          </div>
+          <span className="icon-box bg-red-50 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+          </span>
+        </div>
+        <div className="kpi-card">
+          <div>
+            <p className="text-sm text-slate-500">Deposit held</p>
+            <p className="text-2xl font-semibold mt-1">{money(depositHeld)}</p>
+          </div>
+          <span className="icon-box bg-green-50 text-green-600">
+            <PiggyBank className="w-5 h-5" />
+          </span>
+        </div>
+        <Link
+          href="/vehicles"
+          className="kpi-card !bg-blue-600 !border-blue-600 hover:!bg-blue-700 transition-colors"
+        >
+          <div>
+            <p className="text-sm text-blue-100">Ready for your next trip?</p>
+            <p className="text-xl font-semibold text-white mt-1">Book a vehicle</p>
+          </div>
+          <span className="icon-box bg-blue-500/40 text-white">
+            <ArrowRight className="w-5 h-5" />
+          </span>
         </Link>
       </div>
 
-      <div className="cp-grid2">
-        <div className="cp-card">
-          <h3>Current booking</h3>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="card">
+          <h3 className="font-semibold text-slate-800 mb-4">Current booking</h3>
           {current ? (
             <>
-              <div className="row">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>
+                  <p className="font-medium">
                     {current.make} {current.model} ({current.reg_no})
                   </p>
-                  <p className="muted" style={{ margin: '4px 0 0', fontSize: '.84rem' }}>
-                    Return due {fmtDateTime(current.return_at)}
-                  </p>
+                  <p className="text-sm text-slate-500">Return due {fmtDateTime(current.return_at)}</p>
                 </div>
                 <Badge status={current.status} />
               </div>
-              <div className="cp-actions" style={{ marginTop: 14 }}>
-                <Link href={`/client/bookings/${current.id}`} className="button secondary" style={{ padding: '8px 14px', fontSize: '.8rem' }}>
+              <div className="flex gap-3 mt-4">
+                <Link href={`/client/bookings/${current.id}`} className="btn-secondary !py-1.5 text-xs">
                   Details
                 </Link>
-                <Link href={`/client/bookings/${current.id}#extend`} className="button secondary" style={{ padding: '8px 14px', fontSize: '.8rem' }}>
+                <Link href={`/client/bookings/${current.id}#extend`} className="btn-secondary !py-1.5 text-xs">
                   Request extension
                 </Link>
               </div>
             </>
           ) : (
-            <p className="muted" style={{ fontSize: '.9rem' }}>No vehicle currently on hire.</p>
+            <p className="text-sm text-slate-400">No vehicle currently on hire.</p>
           )}
 
-          <h3 style={{ marginTop: 28 }}>Upcoming booking</h3>
+          <h3 className="font-semibold text-slate-800 mt-8 mb-4">Upcoming booking</h3>
           {upcoming ? (
-            <div className="row">
+            <div className="flex items-center justify-between">
               <div>
-                <p style={{ margin: 0, fontWeight: 700 }}>
+                <p className="font-medium">
                   {upcoming.make} {upcoming.model} ({upcoming.reg_no})
                 </p>
-                <p className="muted" style={{ margin: '4px 0 0', fontSize: '.84rem' }}>
-                  Pickup {fmtDateTime(upcoming.pickup_at)}
-                </p>
+                <p className="text-sm text-slate-500">Pickup {fmtDateTime(upcoming.pickup_at)}</p>
               </div>
               <Badge status={upcoming.status} />
             </div>
           ) : (
-            <p className="muted" style={{ fontSize: '.9rem' }}>No upcoming bookings.</p>
+            <p className="text-sm text-slate-400">No upcoming bookings.</p>
           )}
         </div>
 
-        <div className="cp-card">
-          <h3>Recent wallet activity</h3>
-          {recentTx.length ? (
-            <ul className="cp-list" style={{ margin: '0 -24px' }}>
-              {recentTx.map((t: WalletTxn) => (
-                <li key={t.id}>
-                  <div>
-                    <p style={{ margin: 0, fontWeight: 600 }}>{t.description ?? t.type.replace(/_/g, ' ')}</p>
-                    <span className="t">{fmtDateTime(t.created_at)}</span>
-                  </div>
-                  <span style={{ fontWeight: 800, color: Number(t.amount) < 0 ? '#c0392b' : '#0a6b52' }}>
-                    {Number(t.amount) < 0 ? '−' : '+'}{money(Math.abs(Number(t.amount)))}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="muted" style={{ fontSize: '.9rem' }}>No transactions yet.</p>
-          )}
-          <Link href="/client/wallet" className="button secondary" style={{ width: '100%', marginTop: 16 }}>
+        <div className="card">
+          <h3 className="font-semibold text-slate-800 mb-4">Recent wallet activity</h3>
+          <ul className="divide-y divide-gray-100 text-sm">
+            {recentTx.map((t: WalletTxn) => (
+              <li key={t.id} className="py-3 flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-slate-700">
+                    {t.description ?? t.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </p>
+                  <p className="text-xs text-slate-400">{fmtDateTime(t.created_at)}</p>
+                </div>
+                <span className={`font-semibold ${Number(t.amount) < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {Number(t.amount) < 0 ? '−' : '+'}
+                  {money(Math.abs(Number(t.amount)))}
+                </span>
+              </li>
+            ))}
+            {!recentTx.length && <li className="py-3 text-slate-400">No transactions yet.</li>}
+          </ul>
+          <Link href="/client/wallet" className="btn-secondary w-full justify-center mt-4">
             View wallet
           </Link>
         </div>

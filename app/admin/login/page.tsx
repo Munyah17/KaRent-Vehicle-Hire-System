@@ -24,13 +24,23 @@ interface AdminUserRow {
   roles: { name: string } | { name: string }[] | null;
 }
 
-export default async function AdminLoginPage({ searchParams }: { searchParams?: Promise<{ from?: string }> }) {
+export const metadata = {
+  title: 'Staff Sign In',
+};
+
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ from?: string }>;
+}) {
   const session = await getSession();
   if (session && ['SUPER_ADMIN', 'STAFF'].includes(session.role)) {
     redirect('/admin/dashboard');
   }
 
   const params = await searchParams;
+
+  const themeInit = `try{if((localStorage.getItem('karent.theme')||(document.cookie.match(/theme=(dark)/)||[])[1])==='dark'){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-bs-theme','dark')}}catch(e){}`;
 
   async function loginAction(formData: FormData) {
     'use server';
@@ -52,7 +62,10 @@ export default async function AdminLoginPage({ searchParams }: { searchParams?: 
       user = data as unknown as AdminUserRow | null;
     }
 
-    const ok = !!user && user.status === 'active' && bcrypt.compareSync(password, normalizeHash(user.password_hash));
+    const ok =
+      !!user &&
+      user.status === 'active' &&
+      bcrypt.compareSync(password, normalizeHash(user.password_hash));
 
     const { error: attemptError } = await supabase
       .from('login_attempts')
@@ -85,8 +98,29 @@ export default async function AdminLoginPage({ searchParams }: { searchParams?: 
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <LoginForm action={loginAction} from={params?.from} />
-    </div>
+    <>
+      <link href="/assets/admin/css/font-face.css" rel="stylesheet" />
+      <link href="/assets/admin/vendor/bootstrap-5.3.8.min.css" rel="stylesheet" />
+      <link href="/assets/admin/css/theme.css" rel="stylesheet" />
+      <link href="/assets/admin/css/app.css" rel="stylesheet" />
+      <script src="/assets/vendor/lucide.min.js" defer></script>
+      <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      <script dangerouslySetInnerHTML={{ __html: "document.body.className = 'app auth-page';" }} />
+      <main className="login-wrap">
+        <div className="login-content">
+          <a href="/" className="auth-brand">
+            <span className="logo-mark">K</span>
+            <span className="logo-text">KaRent</span>
+          </a>
+          <h1 className="auth-title">Staff sign in</h1>
+          <p className="auth-subtitle">
+            Back-office access &mdash; clients should use the{' '}
+            <a href="/login">client sign-in page</a>.
+          </p>
+
+          <LoginForm action={loginAction} from={params?.from} />
+        </div>
+      </main>
+    </>
   );
 }

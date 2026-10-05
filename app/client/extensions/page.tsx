@@ -32,52 +32,67 @@ export default async function ExtensionsPage() {
   });
 
   return (
-    <div className="cp-grid32">
-      <div className="cp-card flush">
-        <div className="hd"><h2>Extension Requests</h2></div>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="cp-table">
-            <thead>
-              <tr><th>Booking</th><th>Vehicle</th><th>New Return</th><th className="r">Extra Cost</th><th>Status</th><th></th></tr>
-            </thead>
-            <tbody>
-              {extsRes.map((x) => (
-                <tr key={x.id}>
-                  <td style={{ fontWeight: 700 }}>{x.booking_ref}</td>
-                  <td>{x.make} {x.model}</td>
-                  <td>{fmtDateTime(x.new_return_at)}</td>
-                  <td className="r">{money(x.additional_amount)}</td>
-                  <td><Badge status={x.status} /></td>
-                  <td className="r">
-                    <Link href={`/client/bookings/${x.booking_id}`} style={{ color: '#087f70', fontWeight: 600 }}>Booking</Link>
-                  </td>
-                </tr>
-              ))}
-              {!extsRes.length && <tr><td colSpan={6} className="cp-empty">No extension requests.</td></tr>}
-            </tbody>
-          </table>
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="xl:col-span-2 card !p-0 overflow-x-auto">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-slate-800">Extension Requests</h2>
         </div>
-      </div>
-
-      <div className="cp-card">
-        <h3>Request an extension</h3>
-        <p className="muted" style={{ fontSize: '.86rem', marginTop: -6 }}>
-          Open an eligible booking and choose a new return date.
-        </p>
-        {eligible.length ? (
-          <ul className="cp-list" style={{ margin: '0 -24px -24px' }}>
-            {eligible.map((b) => (
-              <li key={b.id}>
-                <span>
-                  {b.make} {b.model} <span className="t">(due {fmtDate(b.return_at)})</span>
-                </span>
-                <Link href={`/client/bookings/${b.id}#extend`} style={{ color: '#087f70', fontWeight: 600 }}>Extend</Link>
-              </li>
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="th">Booking</th>
+              <th className="th">Vehicle</th>
+              <th className="th">New Return</th>
+              <th className="th">Extra Cost</th>
+              <th className="th">Status</th>
+              <th className="th"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {extsRes.map((x) => (
+              <tr className="table-row" key={x.id}>
+                <td className="td font-medium">{x.booking_ref}</td>
+                <td className="td">
+                  {x.make} {x.model}
+                </td>
+                <td className="td">{fmtDateTime(x.new_return_at)}</td>
+                <td className="td">{money(x.additional_amount)}</td>
+                <td className="td">
+                  <Badge status={x.status} />
+                </td>
+                <td className="td text-right">
+                  <Link href={`/client/bookings/${x.booking_id}`} className="text-blue-600 text-sm hover:underline">
+                    Booking
+                  </Link>
+                </td>
+              </tr>
             ))}
-          </ul>
-        ) : (
-          <p className="muted" style={{ fontSize: '.9rem' }}>No active or confirmed bookings.</p>
-        )}
+            {!extsRes.length && (
+              <tr>
+                <td colSpan={6} className="td text-center py-10 text-slate-400">
+                  No extension requests.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="card">
+        <h3 className="font-semibold text-slate-800 mb-2">Request an extension</h3>
+        <p className="text-sm text-slate-500 mb-4">Open an eligible booking and choose a new return date.</p>
+        <ul className="space-y-2 text-sm">
+          {eligible.map((b) => (
+            <li key={b.id} className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2">
+              <span>
+                {b.make} {b.model} <span className="text-slate-400">(due {fmtDate(b.return_at)})</span>
+              </span>
+              <Link href={`/client/bookings/${b.id}#extend`} className="text-blue-600 hover:underline">
+                Extend
+              </Link>
+            </li>
+          ))}
+          {!eligible.length && <li className="text-slate-400">No active or confirmed bookings.</li>}
+        </ul>
       </div>
     </div>
   );

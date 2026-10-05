@@ -1,6 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import { money, fmtDate, Badge } from '@/lib/helpers';
 
+export const metadata = {
+  title: 'Payments',
+};
+
 interface PaymentRow {
   id: number;
   txn_id: string;
@@ -18,7 +22,11 @@ function orSafe(value: string): string {
   return value.replace(/[(),\\"]/g, '');
 }
 
-export default async function PaymentsPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string; status?: string }>;
+}) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const status = (params?.status ?? '').trim();
@@ -50,52 +58,86 @@ export default async function PaymentsPage({ searchParams }: { searchParams?: Pr
   const rows = (data ?? []) as unknown as PaymentRow[];
 
   const statuses = ['pending', 'successful', 'failed', 'cancelled', 'refunded'];
+  const methods = ['cash', 'bank_transfer', 'paynow', 'card', 'wallet', 'other'];
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold text-slate-800">Payments</h1>
-        <form className="flex gap-2">
-          <input name="q" defaultValue={q} placeholder="Search txn, client" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <select name="status" defaultValue={status} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-            <option value="">All statuses</option>
-            {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+    <div className="card !p-0 overflow-x-auto">
+      <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-gray-100">
+        <form method="get" className="flex flex-wrap items-center gap-3 flex-1">
+          <select name="status" defaultValue={status} className="input w-40">
+            <option value="">All Statuses</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
+            ))}
           </select>
-          <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Filter</button>
+          <select name="method" defaultValue="" className="input w-44">
+            <option value="">All Methods</option>
+            {methods.map((m) => (
+              <option key={m} value={m}>
+                {m
+                  .split('_')
+                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join(' ')}
+              </option>
+            ))}
+          </select>
+          <button className="btn-secondary" type="submit">
+            Filter
+          </button>
         </form>
+        <a href="#" className="btn-primary">
+          <i data-lucide="plus" className="w-4 h-4"></i> New Payment
+        </a>
       </div>
-
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-slate-600">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
             <tr>
-              <th className="px-5 py-3 text-left">Txn ID</th>
-              <th className="px-5 py-3 text-left">Client</th>
-              <th className="px-5 py-3 text-left">Method</th>
-              <th className="px-5 py-3 text-left">Purpose</th>
-              <th className="px-5 py-3 text-right">Amount</th>
-              <th className="px-5 py-3 text-left">Status</th>
-              <th className="px-5 py-3 text-left">Paid</th>
+              <th className="th">Txn ID</th>
+              <th className="th">Client</th>
+              <th className="th">Method</th>
+              <th className="th">Purpose</th>
+              <th className="th">Status</th>
+              <th className="th">Date</th>
+              <th className="th text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((p) => {
               const client = Array.isArray(p.clients) ? p.clients[0] : p.clients;
               return (
-                <tr key={p.id} className="border-t border-slate-100 hover:bg-slate-50">
-                  <td className="px-5 py-3 font-medium text-slate-700">{p.txn_id}</td>
-                  <td className="px-5 py-3 text-slate-600">{client?.full_name}</td>
-                  <td className="px-5 py-3 text-slate-600">{p.method}</td>
-                  <td className="px-5 py-3 text-slate-600">{p.purpose}</td>
-                  <td className="px-5 py-3 text-right text-slate-700">{money(p.amount)}</td>
-                  <td className="px-5 py-3"><Badge status={p.status} /></td>
-                  <td className="px-5 py-3 text-slate-600">{fmtDate(p.paid_at)}</td>
+                <tr key={p.id} className="table-row">
+                  <td className="td font-medium">{p.txn_id}</td>
+                  <td className="td">{client?.full_name}</td>
+                  <td className="td">
+                    {p.method
+                      .split('_')
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(' ')}
+                  </td>
+                  <td className="td">{p.purpose.charAt(0).toUpperCase() + p.purpose.slice(1)}</td>
+                  <td className="td">
+                    <Badge status={p.status} />
+                  </td>
+                  <td className="td">{fmtDate(p.paid_at ?? p.created_at)}</td>
+                  <td className="td text-right font-medium">{money(p.amount)}</td>
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-6 text-slate-400">No payments found.</td></tr>}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={7} className="td text-center py-10 text-slate-400">
+                  No payments found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+      </div>
+      <div className="flex items-center justify-between px-6 py-4">
+        <p className="text-sm text-slate-500">Showing {rows.length} payments</p>
       </div>
     </div>
   );

@@ -24,37 +24,33 @@ export default async function NotificationsPage() {
   }
 
   return (
-    <div className="cp-card flush" style={{ maxWidth: 780 }}>
-      <div className="hd">
-        <h2>Notifications</h2>
-        {notifs.some((n) => n.status === 'unread') && (
-          <form action={markAllRead}>
-            <button className="button secondary" style={{ padding: '8px 14px', fontSize: '.78rem' }}>
-              Mark all read
-            </button>
-          </form>
-        )}
+    <div className="card !p-0 overflow-x-auto max-w-3xl">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 className="font-semibold text-slate-800">Notifications</h2>
+        <form action={markAllRead}>
+          <button className="btn-secondary !py-1.5 text-xs">Mark all read</button>
+        </form>
       </div>
-      {notifs.length ? (
-        <ul className="cp-list">
-          {notifs.map((n) => (
-            <li key={n.id} style={n.status === 'unread' ? { background: '#f0f8f6', alignItems: 'flex-start' } : { alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', gap: 12, flex: 1 }}>
-                <span style={{ width: 34, height: 34, borderRadius: 9, background: '#e3f4ec', color: '#08705f', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                  <Bell size={16} />
-                </span>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700 }}>{n.title}</p>
-                  <p className="muted" style={{ margin: '3px 0 0', fontSize: '.85rem' }}>{n.body ?? ''}</p>
-                  <span className="t">{fmtDateTime(n.created_at)}</span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="cp-empty">No notifications.</div>
-      )}
+      <ul className="divide-y divide-gray-100">
+        {notifs.map((n) => (
+          <li
+            key={n.id}
+            className={`flex items-start gap-4 px-6 py-4 ${n.status === 'unread' ? 'bg-blue-50/40' : ''}`}
+          >
+            <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Bell className="w-4 h-4" />
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-slate-800">{n.title}</p>
+              <p className="text-sm text-slate-500">{n.body ?? ''}</p>
+              <p className="text-xs text-slate-400 mt-1">{fmtDateTime(n.created_at)}</p>
+            </div>
+          </li>
+        ))}
+        {!notifs.length && (
+          <li className="px-6 py-10 text-center text-slate-400 text-sm">No notifications.</li>
+        )}
+      </ul>
     </div>
   );
 }

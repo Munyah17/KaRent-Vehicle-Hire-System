@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { CreditCard } from 'lucide-react';
 import { payWalletAction } from '@/app/client/bookings/[id]/actions';
 import type { ActionState } from '@/app/client/actions';
 
@@ -18,10 +19,19 @@ export default function PayWalletForm({
   return (
     <form action={action}>
       <input type="hidden" name="booking_id" value={bookingId} />
-      {state?.error && <div className="cp-alert err">{state.error}</div>}
-      {state?.success && <div className="cp-alert ok">{state.success}</div>}
-      <div className="cp-form-row">
-        <div className="fld">
+      <input type="hidden" name="method" value="wallet" />
+      {state?.error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">
+          {state.error}
+        </div>
+      )}
+      {state?.success && (
+        <div className="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm">
+          {state.success}
+        </div>
+      )}
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
           <label className="label">Amount</label>
           <input
             type="number"
@@ -30,18 +40,16 @@ export default function PayWalletForm({
             min="0.01"
             max={outstanding.toFixed(2)}
             defaultValue={outstanding.toFixed(2)}
-            required
-            className="input"
-            style={{ width: 160 }}
+            className="input w-40"
           />
         </div>
-        <button className="button" disabled={pending || walletBalance <= 0}>
-          {pending ? 'Processing…' : 'Pay from wallet'}
+        <button className="btn-primary" disabled={pending || walletBalance <= 0}>
+          <CreditCard className="w-4 h-4" /> {pending ? 'Processing…' : 'Pay'}
         </button>
       </div>
-      <p className="muted" style={{ margin: '10px 0 0', fontSize: '.8rem' }}>
-        Wallet balance: ${walletBalance.toFixed(2)}
-        {walletBalance <= 0 && ' — top up is handled at the office or via Paynow.'}
+      <p className="text-xs text-slate-400 mt-3">
+        Paid from wallet — balance ${walletBalance.toFixed(2)}
+        {walletBalance <= 0 && ' (top up at the office or via Paynow)'}
       </p>
     </form>
   );

@@ -1,67 +1,158 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { setting } from '@/lib/settings';
-import { ShieldCheck, CreditCard, Car, Headphones } from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'KaRent');
+  const name = await setting('company_name', 'Vehicle Hire');
   return { title: `About · ${name}` };
 }
 
 export default async function AboutPage() {
-  const [companyName, address, phone, email] = await Promise.all([
-    setting('company_name', 'KaRent'),
-    setting('company_address', ''),
-    setting('company_phone', ''),
-    setting('company_email', ''),
-  ]);
+  const companyName = await setting('company_name', 'Vehicle Hire');
 
   return (
     <main>
-      <section className="page-head">
-        <div className="shell">
-          <h1>About {companyName}</h1>
-          <p className="muted">Reliable vehicle hire backed by transparent pricing and modern booking tools.</p>
+      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
+          <p className="text-blue-300 text-sm font-medium tracking-wide uppercase mb-3">
+            About {companyName}
+          </p>
+          <h1 className="text-3xl md:text-4xl font-semibold">Reliable vehicle hire, made simple</h1>
+          <p className="text-blue-200 mt-4 max-w-2xl mx-auto">
+            Renting a car should be as simple as booking a seat. We run an inspected, diverse fleet with
+            transparent pricing and real human support — from first click to key handover.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            <Link href="/vehicles" className="btn-primary !px-6">
+              Browse the fleet
+            </Link>
+            <Link
+              href="/contact"
+              className="border border-blue-300/40 text-blue-100 hover:bg-white/10 rounded-md px-6 py-2.5 text-sm font-medium"
+            >
+              Talk to us
+            </Link>
+          </div>
         </div>
       </section>
 
-      <section className="section">
-        <div className="shell">
-          <div className="contact-grid">
-            <div className="prose">
-              <p>{companyName} offers a curated fleet of cars, pickups and SUVs for short trips, business travel and family holidays. Every vehicle is inspected between hires, and all prices are calculated from our live fleet system — what you see is what you pay.</p>
-              <p>Our platform gives clients a self-service portal to manage bookings, payments, deposits and documents, while our staff team handles confirmations, checklists and fleet maintenance from a single back office.</p>
-              <p>Payments are verified through Paynow and other trusted channels. We keep full audit trails, digital checklists and contract records so every hire is traceable and secure.</p>
+      <section className="max-w-5xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 items-start">
+          <div className="md:col-span-2">
+            <h2 className="text-2xl font-semibold text-slate-800">Who we are</h2>
+            <p className="text-sm text-blue-600 font-medium mt-1">Your local mobility partner</p>
+          </div>
+          <div className="md:col-span-3 text-slate-600 leading-relaxed space-y-4">
+            <p>
+              {companyName} operates a diverse, fully inspected fleet — from economical city cars and family
+              sedans to 4x4 SUVs, double-cab pickups and premium executive vehicles. Whether you need a runabout
+              for a day, a workhorse for a month, or a people-mover for a team, we have the vehicle and the
+              paperwork sorted.
+            </p>
+            <p>
+              Every hire is documented end-to-end: contract, inspection checklist, photos of all angles, receipts
+              and deposit tracking — so you always know exactly where you stand.
+            </p>
+          </div>
+        </div>
+      </section>
 
-              <h2>Contact details</h2>
-              <ul className="muted">
-                {address && <li>{address}</li>}
-                {phone && <li>{phone}</li>}
-                {email && <li>{email}</li>}
-              </ul>
-            </div>
+      <section className="bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-semibold text-slate-800">Our fleet</h2>
+            <p className="text-sm text-slate-500 mt-2">Five categories, one standard: clean, inspected, ready to go.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              ['wallet', 'Budget', 'Cheapest daily rates — hatchbacks and compact city cars.'],
+              ['car', 'Sedans', 'Comfortable saloons for business travel and family trips.'],
+              ['car-front', 'SUVs & 4x4s', 'Ground clearance and space for rough roads and long journeys.'],
+              ['sparkles', 'Premium', 'Executive and luxury models for occasions that matter.'],
+              ['truck', 'Trucks & Pickups', 'Double cabs and load movers for work crews and sites.'],
+              ['wrench', 'Utility', 'Work vehicles for field, farm and site operations.'],
+            ].map(([icon, t, d]) => (
+              <div
+                key={t}
+                className="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 hover:shadow-md transition-shadow"
+              >
+                <span className="icon-box bg-blue-50 text-blue-600 shrink-0">
+                  <i data-lucide={icon} className="w-5 h-5"></i>
+                </span>
+                <div>
+                  <p className="font-semibold text-slate-800 text-sm">{t}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div className="panel" style={{ textAlign: 'center' }}>
-                <Car className="w-8 h-8" style={{ margin: '0 auto 14px', color: '#087f70' }} />
-                <h3>Quality fleet</h3>
-                <p className="muted">Sedans, SUVs, pickups and city cars for every journey.</p>
-              </div>
-              <div className="panel" style={{ textAlign: 'center' }}>
-                <CreditCard className="w-8 h-8" style={{ margin: '0 auto 14px', color: '#087f70' }} />
-                <h3>Verified payments</h3>
-                <p className="muted">Paynow, card and wallet options with receipt tracking.</p>
-              </div>
-              <div className="panel" style={{ textAlign: 'center' }}>
-                <ShieldCheck className="w-8 h-8" style={{ margin: '0 auto 14px', color: '#087f70' }} />
-                <h3>Full accountability</h3>
-                <p className="muted">Digital contracts, checklists and damage records.</p>
-              </div>
-              <div className="panel" style={{ textAlign: 'center' }}>
-                <Headphones className="w-8 h-8" style={{ margin: '0 auto 14px', color: '#087f70' }} />
-                <h3>Local support</h3>
-                <p className="muted">Reach our team by phone, email or the contact form.</p>
-              </div>
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl font-semibold text-slate-800">How hiring works</h2>
+          <p className="text-sm text-slate-500 mt-2">Four steps from browsing to driving away.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            ['1', 'Book online', 'Pick a vehicle and dates, submit your request — no account required.'],
+            ['2', 'Get verified', 'We confirm your licence and ID, agree the deposit and issue the contract.'],
+            ['3', 'Collect', 'Handover inspection together — condition, fuel and mileage recorded.'],
+            ['4', 'Return', 'Return inspection closes the hire and releases your deposit.'],
+          ].map(([n, t, d]) => (
+            <div key={n} className="card text-center !p-6">
+              <span className="inline-flex w-10 h-10 rounded-full bg-blue-600 text-white items-center justify-center font-semibold mb-3">
+                {n}
+              </span>
+              <p className="font-semibold text-slate-800">{t}</p>
+              <p className="text-xs text-slate-500 mt-1.5">{d}</p>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="bg-gray-50 border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-semibold text-slate-800">Why customers choose us</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              ['shield-check', 'Safe journeys', 'Regular maintenance plus documented pre-hire inspections with photo records on every vehicle.'],
+              ['banknote', 'Transparent pricing', 'Clear daily, weekly and monthly rates — the quote you see is the quote you pay. No hidden fees.'],
+              ['headphones', 'Real support', 'Booking help, extensions, replacements and roadside queries — before, during and after your rental.'],
+              ['credit-card', 'Flexible payments', 'Pay online via Paynow, top up your wallet, or settle at the office — deposits tracked and refunded.'],
+              ['file-check', 'Proper paperwork', 'Every hire gets a contract, checklist and receipts — all accessible in your client account.'],
+              ['map-pin', 'Local expertise', 'We know the roads you drive — city commutes, cross-border trips, gravel routes and beyond.'],
+            ].map(([icon, t, d]) => (
+              <div key={t} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <i data-lucide={icon} className="w-7 h-7 text-blue-600 mb-3"></i>
+                <p className="font-semibold text-slate-800">{t}</p>
+                <p className="text-sm text-slate-500 mt-1.5">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-6 py-14">
+        <div className="rounded-2xl bg-gradient-to-br from-blue-900 to-indigo-900 p-10 text-center text-white">
+          <h2 className="text-2xl font-semibold mb-2">Ready to get moving?</h2>
+          <p className="text-blue-200 text-sm mb-6">
+            Browse the fleet and book in minutes — no account needed. Create a free account to manage hires,
+            payments and documents in one place.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/vehicles" className="bg-white text-blue-900 hover:bg-blue-50 rounded-md px-6 py-2.5 text-sm font-semibold">
+              Browse vehicles
+            </Link>
+            <Link
+              href="/register"
+              className="border border-white/40 text-white hover:bg-white/10 rounded-md px-6 py-2.5 text-sm font-medium"
+            >
+              Create account
+            </Link>
           </div>
         </div>
       </section>

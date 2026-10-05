@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import StatusBadge from './StatusBadge';
 
 export default function VehicleCard({
   id,
@@ -12,6 +12,8 @@ export default function VehicleCard({
   daily_rate,
   status,
   photo,
+  hires,
+  reg_no = '',
 }: {
   id: number;
   make: string;
@@ -23,27 +25,58 @@ export default function VehicleCard({
   daily_rate: number | string;
   status: string;
   photo: string;
+  hires?: number;
+  reg_no?: string;
 }) {
   const rate = typeof daily_rate === 'string' ? parseFloat(daily_rate) : daily_rate;
-  const badge = status === 'available' ? 'Available' : status === 'on_hire' ? 'On hire' : status;
-  const busy = status !== 'available';
+  const badgeStatus = status === 'on_hire' ? 'reserved' : status;
+  const vehUrl = `/vehicles/${id}`;
+  const subject = `Inquiry: ${make} ${model}${reg_no ? ` (${reg_no})` : ''}`;
+  const inquireUrl = `/contact?subject=${encodeURIComponent(subject)}`;
 
   return (
-    <article className="vehicle">
-      <Link href={`/vehicles/${id}`}>
-        <img src={photo} alt={`${make} ${model}`} className="vehicle-image" />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+      <Link href={vehUrl}>
+        <img src={photo} className="w-full h-60 object-cover" alt={`${make} ${model}`} />
       </Link>
-      <div className="vehicle-body">
-        <div className="row">
-          <h3><Link href={`/vehicles/${id}`}>{make} {model}</Link></h3>
-          <span className={busy ? 'badge busy' : 'badge'}>{badge}</span>
+      <div className="p-4">
+        <div className="flex items-start justify-between">
+          <h3 className="font-semibold text-slate-800">
+            <Link href={vehUrl} className="hover:text-blue-600">
+              {make} {model}
+            </Link>
+          </h3>
+          <StatusBadge status={badgeStatus} />
         </div>
-        <p className="meta">{year || '-'} · {transmission} · {fuel_type} · {seats} seats</p>
-        <p className="price">${rate.toFixed(2)}<small> / day</small></p>
-        <div className="actions">
-          <Link href={`/vehicles/${id}`} className="button" style={{ background: '#087f70', color: 'white', flex: 1 }}>Book now<ArrowRight className="w-4 h-4" style={{ marginLeft: 6 }} /></Link>
+        <p className="text-xs text-slate-500 mt-1">
+          {year ?? '-'} · {transmission.charAt(0).toUpperCase() + transmission.slice(1)} ·{' '}
+          {fuel_type.charAt(0).toUpperCase() + fuel_type.slice(1)} · {seats} seats
+          {hires !== undefined && hires !== null ? (
+            <>
+              {' '}
+              · <span className="text-blue-600 font-medium">{hires} hire{hires === 1 ? '' : 's'}</span>
+            </>
+          ) : null}
+        </p>
+        <p className="text-lg font-semibold text-blue-600 mt-2">
+          ${rate.toFixed(2)}
+          <span className="text-sm font-normal text-slate-400">/day</span>
+        </p>
+        <div className="flex gap-2 mt-3">
+          <Link
+            href={inquireUrl}
+            className="flex-1 text-center border border-gray-300 text-slate-700 hover:bg-gray-50 rounded-md px-3 py-2 text-xs font-medium"
+          >
+            Inquire
+          </Link>
+          <Link
+            href={vehUrl}
+            className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-2 text-xs font-medium"
+          >
+            Book Now
+          </Link>
         </div>
       </div>
-    </article>
+    </div>
   );
 }

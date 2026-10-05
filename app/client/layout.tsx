@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Bell } from 'lucide-react';
 import { requireClient, unreadCount } from '@/components/client/data';
-import ClientNav from '@/components/client/ClientNav';
-import { logoutAction } from './actions';
-import './client.css';
+import { setting } from '@/lib/settings';
+import ClientShell from '@/components/client/ClientShell';
 
 export const metadata: Metadata = {
   title: { default: 'Client Portal', template: '%s · Client Portal' },
@@ -12,32 +9,25 @@ export const metadata: Metadata = {
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
   const { user, client } = await requireClient();
-  const unread = await unreadCount(user.id);
+  const [unread, companyName] = await Promise.all([
+    unreadCount(user.id),
+    setting('company_name', 'Vehicle Hire'),
+  ]);
 
   return (
-    <>
-      <div className="cp-top">
-        <div className="shell cp-topbar">
-          <div className="who">
-            <strong>{client.full_name}</strong> · {client.client_no}
-          </div>
-          <div className="cp-toplinks">
-            <Link href="/client/notifications" className="bell" aria-label="Notifications">
-              <Bell size={19} />
-              {unread > 0 && <span className="n">{unread > 99 ? '99' : unread}</span>}
-            </Link>
-            <form action={logoutAction}>
-              <button type="submit" className="cp-signout">Sign out</button>
-            </form>
-          </div>
-        </div>
-        <div className="shell">
-          <ClientNav />
-        </div>
-      </div>
-      <main className="cp-main">
-        <div className="shell">{children}</div>
-      </main>
-    </>
+    <div className="bg-slate-50">
+      {/* Compiled Tailwind stylesheet ported from the PHP app (card/btn/input/table/drawer classes) */}
+      {/* eslint-disable-next-line @next/next/no-css-tags */}
+      <link rel="stylesheet" href="/assets/css/app.css" precedence="default" />
+      {/* The PHP client portal renders its own chrome — hide the public site header/footer */}
+      <style>{`.header,.footer{display:none!important}`}</style>
+      <ClientShell
+        name={client.full_name ?? user.name ?? ''}
+        unread={unread}
+        companyName={companyName}
+      >
+        {children}
+      </ClientShell>
+    </div>
   );
 }

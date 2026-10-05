@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type HeroSlide = {
   image: string;
@@ -18,74 +17,112 @@ export type HeroSlide = {
 
 export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const [i, setI] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  const go = useCallback(
+    (n: number) => {
+      setI((n + slides.length) % slides.length);
+    },
+    [slides.length]
+  );
 
   useEffect(() => {
     if (slides.length < 2) return;
-    const t = setInterval(() => setI((x) => (x + 1) % slides.length), 6000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setI((x) => (x + 1) % slides.length), 6000);
+    return () => clearInterval(timer);
   }, [slides.length]);
-
-  const go = (n: number) => setI((n + slides.length) % slides.length);
 
   if (!slides.length) return null;
 
   return (
-    <section className="hero-slider" style={{ height: 520, position: 'relative', overflow: 'hidden' }}>
+    <section className="hero-slider relative overflow-hidden" id="heroSlider" style={{ height: 520 }}>
       {slides.map((s, idx) => (
         <div
           key={idx}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: idx === i ? 1 : 0,
-            zIndex: idx === i ? 10 : 0,
-            transition: 'opacity 700ms ease',
-            pointerEvents: idx === i ? 'auto' : 'none',
-          }}
+          data-slide={idx}
+          className={`hero-slide absolute inset-0 transition-opacity duration-700 ${
+            idx === i ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+          }`}
         >
-          <img src={s.image} alt={s.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: `rgba(0,0,0,${(s.overlay || 70) / 100})` }} />
-          <div className="shell" style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', alignItems: 'center' }}>
-            <div style={{ maxWidth: 620, color: 'white' }}>
-              {s.subtitle && <p className="eyebrow" style={{ color: '#a7e8de' }}>{s.subtitle}</p>}
-              <h1 style={{ fontSize: 'clamp(2.2rem,5vw,4rem)', margin: '12px 0 18px', letterSpacing: '-0.04em' }}>{s.title}</h1>
-              {s.description && <p style={{ fontSize: '1.1rem', color: '#e2efed', marginBottom: 28 }}>{s.description}</p>}
-              <div className="actions">
-                {s.cta1_label && <Link href={s.cta1_url || '/vehicles'} className="button" style={{ background: '#087f70', color: 'white' }}>{s.cta1_label}</Link>}
-                {s.cta2_label && <Link href={s.cta2_url || '/vehicles'} className="button secondary">{s.cta2_label}</Link>}
+          <img
+            src={s.image}
+            alt={s.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading={idx === 0 ? 'eager' : 'lazy'}
+          />
+          <div className="absolute inset-0 bg-black" style={{ opacity: s.overlay / 100 }}></div>
+          <div className="relative z-10 h-full flex items-center">
+            <div className="max-w-7xl mx-auto px-6 w-full">
+              <div className="max-w-2xl text-white">
+                {s.subtitle ? (
+                  <p className="text-sm uppercase tracking-widest text-blue-200 mb-2">{s.subtitle}</p>
+                ) : null}
+                <h1 className="text-4xl md:text-5xl font-bold mb-3">{s.title}</h1>
+                {s.description ? <p className="text-lg text-gray-200 mb-6">{s.description}</p> : null}
+                <div className="flex flex-wrap gap-3">
+                  {s.cta1_label ? (
+                    <Link href={s.cta1_url || '/vehicles'} className="btn-primary !px-6 !py-3">
+                      {s.cta1_label}
+                    </Link>
+                  ) : null}
+                  {s.cta2_label ? (
+                    <Link
+                      href={s.cta2_url || '/vehicles'}
+                      className="inline-flex items-center gap-2 border border-white/60 text-white hover:bg-white/10 px-6 py-3 rounded-md text-sm font-medium transition-colors"
+                    >
+                      {s.cta2_label}
+                    </Link>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
         </div>
       ))}
+
       {slides.length > 1 && (
         <>
-          <button type="button" aria-label="Previous" onClick={() => go(i - 1)} style={arrowStyle}><ChevronLeft className="w-5 h-5" /></button>
-          <button type="button" aria-label="Next" onClick={() => go(i + 1)} style={{ ...arrowStyle, right: 16, left: 'auto' }}><ChevronRight className="w-5 h-5" /></button>
-          <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 20, display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            id="heroPrev"
+            aria-label="Previous slide"
+            onClick={() => go(i - 1)}
+            className="absolute z-20 left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
+          >
+            <i data-lucide="chevron-left" className="w-5 h-5"></i>
+          </button>
+          <button
+            type="button"
+            id="heroNext"
+            aria-label="Next slide"
+            onClick={() => go(i + 1)}
+            className="absolute z-20 right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
+          >
+            <i data-lucide="chevron-right" className="w-5 h-5"></i>
+          </button>
+          <div
+            className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5"
+            id="heroDots"
+          >
             {slides.map((_, idx) => (
-              <button key={idx} aria-label={`Slide ${idx + 1}`} onClick={() => go(idx)} style={{ width: 10, height: 10, borderRadius: '50%', border: 0, background: idx === i ? 'white' : 'rgba(255,255,255,0.4)' }} />
+              <button
+                key={idx}
+                type="button"
+                data-dot={idx}
+                aria-label={`Slide ${idx + 1}`}
+                onClick={() => go(idx)}
+                className={`w-2.5 h-2.5 rounded-full hover:bg-white transition-colors ${
+                  idx === i ? 'bg-white' : 'bg-white/40'
+                }`}
+              />
             ))}
           </div>
         </>
       )}
+      <style>{`
+        .hero-slider { height: 520px; }
+        @media (max-width: 768px) { .hero-slider { height: 430px; } }
+      `}</style>
     </section>
   );
 }
-
-const arrowStyle: React.CSSProperties = {
-  position: 'absolute',
-  left: 16,
-  top: '50%',
-  transform: 'translateY(-50%)',
-  zIndex: 20,
-  width: 44,
-  height: 44,
-  borderRadius: '50%',
-  border: 0,
-  background: 'rgba(0,0,0,0.45)',
-  color: 'white',
-  display: 'grid',
-  placeItems: 'center',
-  cursor: 'pointer',
-};

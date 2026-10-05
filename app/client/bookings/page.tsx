@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { money, fmtDateTime } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
 import { requireClient, listBookings } from '@/components/client/data';
@@ -10,49 +11,57 @@ export default async function BookingsPage() {
   const bookings = await listBookings(client.id);
 
   return (
-    <div className="cp-card flush">
-      <div className="hd">
-        <h2>My Bookings</h2>
-        <Link href="/vehicles" className="button" style={{ padding: '9px 16px', fontSize: '.82rem' }}>
-          New booking
+    <div className="card !p-0 overflow-x-auto">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 className="font-semibold text-slate-800">My Bookings</h2>
+        <Link href="/vehicles" className="btn-primary">
+          <Plus className="w-4 h-4" /> New booking
         </Link>
       </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table className="cp-table">
-          <thead>
-            <tr>
-              <th>Ref</th><th>Vehicle</th><th>Pickup</th><th>Return</th><th>Status</th>
-              <th className="r">Total</th><th></th>
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className="th">Ref</th>
+            <th className="th">Vehicle</th>
+            <th className="th">Pickup</th>
+            <th className="th">Return</th>
+            <th className="th">Status</th>
+            <th className="th">Total</th>
+            <th className="th"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {bookings.map((b) => (
+            <tr className="table-row" key={b.id}>
+              <td className="td font-medium">{b.ref}</td>
+              <td className="td">
+                {b.make} {b.model} <span className="text-xs text-slate-400">({b.reg_no})</span>
+              </td>
+              <td className="td">{fmtDateTime(b.pickup_at)}</td>
+              <td className="td">{fmtDateTime(b.return_at)}</td>
+              <td className="td">
+                <Badge status={b.status} />
+              </td>
+              <td className="td font-medium">{money(b.total)}</td>
+              <td className="td text-right">
+                <Link href={`/client/bookings/${b.id}`} className="text-blue-600 text-sm hover:underline">
+                  View
+                </Link>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {bookings.map((b) => (
-              <tr key={b.id}>
-                <td style={{ fontWeight: 700 }}>{b.ref}</td>
-                <td>
-                  {b.make} {b.model} <span className="muted" style={{ fontSize: '.78rem' }}>({b.reg_no})</span>
-                </td>
-                <td>{fmtDateTime(b.pickup_at)}</td>
-                <td>{fmtDateTime(b.return_at)}</td>
-                <td><Badge status={b.status} /></td>
-                <td className="r" style={{ fontWeight: 700 }}>{money(b.total)}</td>
-                <td className="r">
-                  <Link href={`/client/bookings/${b.id}`} style={{ color: '#087f70', fontWeight: 600 }}>
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {!bookings.length && (
-              <tr>
-                <td colSpan={7} className="cp-empty">
-                  No bookings yet. <Link href="/vehicles" style={{ color: '#087f70' }}>Browse vehicles</Link>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))}
+          {!bookings.length && (
+            <tr>
+              <td colSpan={7} className="td text-center py-10 text-slate-400">
+                No bookings yet.{' '}
+                <Link href="/vehicles" className="text-blue-600">
+                  Browse vehicles
+                </Link>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -3,60 +3,45 @@ import { fmtDate } from '@/lib/helpers';
 import Badge from '@/components/client/Badge';
 import ProfileForm from '@/components/client/ProfileForm';
 import UploadDocForm from '@/components/client/UploadDocForm';
-import PasswordForm from '@/components/client/PasswordForm';
 import { requireClient, listClientDocs } from '@/components/client/data';
 
 export const metadata = { title: 'Profile & KYC' };
 
 export default async function ProfilePage() {
-  const { user, client } = await requireClient();
+  const { client } = await requireClient();
   const docs = await listClientDocs(client.id);
 
   return (
-    <>
-      <div className="cp-grid2" style={{ alignItems: 'start' }}>
-        <div className="cp-card">
-          <div className="row" style={{ marginBottom: 18 }}>
-            <h2 style={{ margin: 0 }}>My Profile</h2>
-            <Badge status={client.kyc_status} />
-          </div>
-          <dl className="cp-dl" style={{ marginBottom: 20 }}>
-            <div className="row"><dt>Email (login)</dt><dd>{user.email}</dd></div>
-            <div className="row"><dt>Client no.</dt><dd>{client.client_no}</dd></div>
-            <div className="row"><dt>Member since</dt><dd>{fmtDate(client.created_at)}</dd></div>
-          </dl>
-          <ProfileForm client={client} />
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="card">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-semibold text-slate-800">My Profile</h2>
+          <Badge status={client.kyc_status} />
         </div>
-
-        <div>
-          <div className="cp-card">
-            <h2>Verification documents</h2>
-            <p className="muted" style={{ fontSize: '.82rem', marginTop: -8 }}>
-              Upload your ID and driver&apos;s licence. Documents are stored securely and reviewed by staff.
-            </p>
-            {docs.length > 0 && (
-              <ul className="cp-list" style={{ margin: '0 -24px 16px' }}>
-                {docs.map((d) => (
-                  <li key={d.id}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                      <FileText size={15} color="#607477" />
-                      <span style={{ textTransform: 'capitalize' }}>{d.doc_type.replace(/_/g, ' ')}</span>
-                      <span className="t">{fmtDate(d.uploaded_at)}</span>
-                    </span>
-                    <Badge status={d.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <UploadDocForm />
-          </div>
-
-          <div className="cp-card">
-            <h2>Change password</h2>
-            <PasswordForm />
-          </div>
-        </div>
+        <ProfileForm client={client} />
       </div>
-    </>
+
+      <div className="card">
+        <h2 className="font-semibold text-slate-800 mb-1">Verification documents</h2>
+        <p className="text-xs text-slate-400 mb-4">
+          Upload your ID and driver&apos;s licence. Documents are stored securely and are never publicly
+          accessible.
+        </p>
+        <ul className="divide-y divide-gray-100 text-sm mb-4">
+          {docs.map((d) => (
+            <li key={d.id} className="py-3 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-gray-400" />
+                {d.doc_type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                <span className="text-xs text-slate-400">{fmtDate(d.uploaded_at)}</span>
+              </span>
+              <Badge status={d.status} />
+            </li>
+          ))}
+          {!docs.length && <li className="py-3 text-slate-400">No documents uploaded yet.</li>}
+        </ul>
+        <UploadDocForm />
+      </div>
+    </div>
   );
 }

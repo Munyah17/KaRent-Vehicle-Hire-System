@@ -2,6 +2,10 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { money, fmtDate, Badge } from '@/lib/helpers';
 
+export const metadata = {
+  title: 'Bookings',
+};
+
 interface BookingRow {
   id: number;
   ref: string;
@@ -21,14 +25,20 @@ function orSafe(value: string): string {
   return value.replace(/[(),\\"]/g, '');
 }
 
-export default async function BookingsPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
+export default async function BookingsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string; status?: string }>;
+}) {
   const params = await searchParams;
   const q = (params?.q ?? '').trim();
   const status = (params?.status ?? '').trim();
 
   let qb = supabase
     .from('bookings')
-    .select('id, ref, status, pickup_at, return_at, total, source, client_id, vehicle_id, clients!inner(id, full_name), vehicles!inner(id, reg_no)')
+    .select(
+      'id, ref, status, pickup_at, return_at, total, source, client_id, vehicle_id, clients!inner(id, full_name), vehicles!inner(id, reg_no)'
+    )
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -58,30 +68,49 @@ export default async function BookingsPage({ searchParams }: { searchParams?: Pr
   const statuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled', 'overdue'];
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold text-slate-800">Bookings</h1>
-        <form className="flex gap-2">
-          <input name="q" defaultValue={q} placeholder="Search ref, client, vehicle" className="rounded-md border border-slate-300 px-3 py-2 text-sm" />
-          <select name="status" defaultValue={status} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
-            <option value="">All statuses</option>
-            {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+    <div className="card !p-0 overflow-x-auto">
+      <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-gray-100">
+        <form method="get" className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative">
+            <i data-lucide="search" className="w-4 h-4 absolute left-3 top-2.5 text-gray-400"></i>
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Search ref, client, reg..."
+              className="input !pl-9 w-64"
+            />
+          </div>
+          <select name="status" defaultValue={status} className="input w-40">
+            <option value="">All Statuses</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
+            ))}
           </select>
-          <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Filter</button>
+          <button className="btn-secondary" type="submit">
+            Filter
+          </button>
         </form>
+        <a href="#" className="btn-secondary">
+          <i data-lucide="calendar-days" className="w-4 h-4"></i> Calendar
+        </a>
+        <a href="#" className="btn-primary">
+          <i data-lucide="plus" className="w-4 h-4"></i> New Booking
+        </a>
       </div>
-
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-slate-600">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
             <tr>
-              <th className="px-5 py-3 text-left">Ref</th>
-              <th className="px-5 py-3 text-left">Client</th>
-              <th className="px-5 py-3 text-left">Vehicle</th>
-              <th className="px-5 py-3 text-left">Pickup</th>
-              <th className="px-5 py-3 text-left">Return</th>
-              <th className="px-5 py-3 text-right">Total</th>
-              <th className="px-5 py-3 text-left">Status</th>
+              <th className="th">Ref</th>
+              <th className="th">Client</th>
+              <th className="th">Vehicle</th>
+              <th className="th">Pickup</th>
+              <th className="th">Return</th>
+              <th className="th">Status</th>
+              <th className="th">Total</th>
+              <th className="th"></th>
             </tr>
           </thead>
           <tbody>
@@ -89,20 +118,38 @@ export default async function BookingsPage({ searchParams }: { searchParams?: Pr
               const client = Array.isArray(b.clients) ? b.clients[0] : b.clients;
               const vehicle = Array.isArray(b.vehicles) ? b.vehicles[0] : b.vehicles;
               return (
-                <tr key={b.id} className="border-t border-slate-100 hover:bg-slate-50">
-                  <td className="px-5 py-3 font-medium text-slate-700"><Link href={`/admin/bookings/${b.id}`} className="hover:underline">{b.ref}</Link></td>
-                  <td className="px-5 py-3 text-slate-600">{client?.full_name}</td>
-                  <td className="px-5 py-3 text-slate-600">{vehicle?.reg_no}</td>
-                  <td className="px-5 py-3 text-slate-600">{fmtDate(b.pickup_at)}</td>
-                  <td className="px-5 py-3 text-slate-600">{fmtDate(b.return_at)}</td>
-                  <td className="px-5 py-3 text-right text-slate-700">{money(b.total)}</td>
-                  <td className="px-5 py-3"><Badge status={b.status} /></td>
+                <tr key={b.id} className="table-row">
+                  <td className="td font-medium text-slate-800">{b.ref}</td>
+                  <td className="td">{client?.full_name}</td>
+                  <td className="td">
+                    {vehicle?.reg_no}
+                  </td>
+                  <td className="td">{fmtDate(b.pickup_at)}</td>
+                  <td className="td">{fmtDate(b.return_at)}</td>
+                  <td className="td">
+                    <Badge status={b.status} />
+                  </td>
+                  <td className="td font-medium">{money(b.total)}</td>
+                  <td className="td text-right">
+                    <Link href={`/admin/bookings/${b.id}`} className="text-blue-600 text-sm hover:underline">
+                      View
+                    </Link>
+                  </td>
                 </tr>
               );
             })}
-            {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-6 text-slate-400">No bookings found.</td></tr>}
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={8} className="td text-center py-10 text-slate-400">
+                  No bookings found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+      </div>
+      <div className="flex items-center justify-between px-6 py-4">
+        <p className="text-sm text-slate-500">Showing {rows.length} bookings</p>
       </div>
     </div>
   );

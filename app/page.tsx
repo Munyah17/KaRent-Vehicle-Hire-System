@@ -4,8 +4,7 @@ import { setting } from '@/lib/settings';
 import HeroSlider, { HeroSlide } from '@/components/public/HeroSlider';
 import SearchForm from '@/components/public/SearchForm';
 import VehicleCard from '@/components/public/VehicleCard';
-import { getPrimaryPhoto, Vehicle } from '@/components/public/data';
-import { Globe, User, ShieldCheck } from 'lucide-react';
+import { getPrimaryPhoto } from '@/components/public/data';
 
 type DbVehicle = {
   id: number;
@@ -26,7 +25,7 @@ type DbVehicle = {
   deposit: number;
   status: string;
   is_public: boolean;
-  is_featured: boolean;
+  category: string;
   created_at: string;
 };
 
@@ -42,41 +41,36 @@ type SlideRow = {
   overlay: number;
 };
 
-function toVehicle(row: DbVehicle): Vehicle {
-  return {
-    ...row,
-    is_public: row.is_public ? 1 : 0,
-    is_featured: row.is_featured ? 1 : 0,
-  };
-}
-
 export default async function HomePage() {
-  const [companyName, slidesRaw, vehiclesRaw] = await Promise.all([
-    setting('company_name', 'KaRent'),
+  const [companyName, slidesRaw, vehiclesRaw, bookingsRaw] = await Promise.all([
+    setting('company_name', 'Vehicle Hire'),
     supabase
       .from('hero_slides')
       .select('image, title, subtitle, description, cta1_label, cta1_url, cta2_label, cta2_url, overlay')
       .eq('is_active', true)
       .order('sort_order', { ascending: true })
       .order('id', { ascending: true })
-      .limit(20)
-      .returns<SlideRow[]>(),
+      .limit(20),
     supabase
       .from('vehicles')
       .select('*')
       .eq('is_public', true)
-      .in('status', ['available', 'reserved', 'on_hire'])
-      .order('is_featured', { ascending: false })
+      .not('status', 'in', '("maintenance","unavailable")')
       .order('daily_rate', { ascending: true })
-      .limit(6)
       .returns<DbVehicle[]>(),
+    supabase
+      .from('bookings')
+      .select('vehicle_id')
+      .in('status', ['confirmed', 'active', 'completed', 'overdue'])
+      .returns<{ vehicle_id: number }[]>(),
   ]);
 
   if (slidesRaw.error) throw slidesRaw.error;
   if (vehiclesRaw.error) throw vehiclesRaw.error;
+  if (bookingsRaw.error) throw bookingsRaw.error;
 
   const slides: HeroSlide[] = (slidesRaw.data ?? []).length
-    ? (slidesRaw.data ?? []).map((s) => ({ ...s, image: `/uploads/${s.image}` }))
+    ? (slidesRaw.data ?? []).map((s: SlideRow) => ({ ...s, image: `/${s.image.replace(/^\/+/, '')}` }))
     : [
         {
           image: '/assets/img/car-placeholder.jpg',
@@ -86,71 +80,136 @@ export default async function HomePage() {
           cta1_label: 'Browse Fleet',
           cta1_url: '/vehicles',
           cta2_label: 'Get Started',
-          cta2_url: '/vehicles',
+          cta2_url: '/register',
           overlay: 70,
         },
       ];
 
-  const vehicles = (vehiclesRaw.data ?? []).map(toVehicle);
+  const vehicles = vehiclesRaw.data ?? [];
 
-  const cards = await Promise.all(
-    vehicles.map(async (v) => ({
-      ...v,
-      photo: await getPrimaryPhoto(v.id),
-    }))
-  );
+  const hireCounts: Record<number, number> = {};
+  for (const b of bookingsRaw.data ?? []) {
+    if (!b.vehicle_id) continue;
+    hireCounts[b.vehicle_id] = (hireCounts[b.vehicle_id] ?? 0) + 1;
+  }
+
+  const popular = [...vehicles]
+    .sort((a, b) => (hireCounts[b.id] ?? 0) - (hireCounts[a.id] ?? 0) || a.daily_rate - b.daily_rate)
+    .slice(0, 6);
+
+  const categories: Record<string, [string, string, string]> = {
+    budget: ['Budget Vehicles', 'wallet', 'Economical daily drivers — lowest rates in the fleet.'],
+    sedan: ['Sedans', 'car', 'Comfortable saloons for business and family trips.'],
+    suv: ['SUVs & 4x4s', 'car-front', 'Space, ground clearance and all-road confidence.'],
+    premium: ['Premium Vehicles', 'sparkles', 'Executive and luxury models for special occasions.'],
+    truck: ['Trucks & Pickups', 'truck', 'Load-moving pickups and trucks for work crews.'],
+  };
+
+  const byCategory: Record<string, DbVehicle[]> = {};
+  for (const [cat] of Object.entries(categories)) {
+    byCategory[cat] = vehicles.filter((v) => v.category === cat).slice(0, 6);
+  }
+
+  const enrich = async (list: DbVehicle[], includeHires = false) =>
+    Promise.all(
+      list.map(async (v) => ({
+        ...v,
+        photo: await getPrimaryPhoto(v.id),
+        hires: includeHires ? (hireCounts[v.id] ?? 0) : undefined,
+      }))
+    );
+
+  const [popularCards, categoryCards] = await Promise.all([
+    enrich(popular, true),
+    Promise.all(
+      Object.keys(categories).map(async (cat) => ({
+        cat,
+        label: categories[cat][0],
+        icon: categories[cat][1],
+        blurb: categories[cat][2],
+        items: await enrich(byCategory[cat]),
+      }))
+    ),
+  ]);
 
   return (
     <main>
       <HeroSlider slides={slides} />
 
-      <section className="hero" style={{ padding: '40px 0 56px' }}>
-        <div className="shell hero-grid">
-          <div>
-            <p className="eyebrow">Plan your trip</p>
-            <h1>Find the right vehicle for any journey.</h1>
-            <p className="lead">Search available cars, pickups and SUVs for your dates. Prices shown are live and verified from our fleet system.</p>
-          </div>
+      <section className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <SearchForm />
         </div>
       </section>
 
-      <section className="section alt">
-        <div className="shell">
-          <div className="grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
-            <div className="panel">
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', marginBottom: 14 }}>
-                <Globe className="w-5 h-5" />
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 my-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="card !p-3">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="globe" className="w-4 h-4"></i>
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-slate-800 text-sm">Browse as guest</h3>
+                <p className="text-xs text-slate-500">
+                  No account needed — browse vehicles, check availability and prices.{" "}
+                  <Link href="/vehicles" className="text-blue-600 font-medium hover:underline whitespace-nowrap">
+                    View vehicles →
+                  </Link>
+                </p>
               </div>
-              <h3>Browse as guest</h3>
-              <p className="muted">No account needed — browse vehicles, check availability and prices. <Link href="/vehicles" style={{ color: '#087f70', fontWeight: 700 }}>View vehicles →</Link></p>
             </div>
-            <div className="panel">
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', marginBottom: 14 }}>
-                <User className="w-5 h-5" />
+          </div>
+          <div className="card !p-3">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="user" className="w-4 h-4"></i>
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-slate-800 text-sm">Client portal</h3>
+                <p className="text-xs text-slate-500">
+                  Manage bookings, payments, deposits, wallet and documents.{" "}
+                  <Link href="/register" className="text-blue-600 font-medium hover:underline whitespace-nowrap">
+                    Create account →
+                  </Link>
+                </p>
               </div>
-              <h3>Client portal</h3>
-              <p className="muted">Manage bookings, payments, deposits and documents. <Link href="/login" style={{ color: '#087f70', fontWeight: 700 }}>Sign in →</Link></p>
             </div>
-            <div className="panel">
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', marginBottom: 14 }}>
-                <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div className="card !p-3">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" className="w-4 h-4"></i>
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-slate-800 text-sm">Simple &amp; secure</h3>
+                <p className="text-xs text-slate-500">
+                  Verified payments via Paynow, transparent pricing, real photos.{" "}
+                  <Link href="/terms" className="text-blue-600 font-medium hover:underline whitespace-nowrap">
+                    Read terms →
+                  </Link>
+                </p>
               </div>
-              <h3>Simple &amp; secure</h3>
-              <p className="muted">Verified payments via Paynow, transparent pricing, real photos.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="section">
-        <div className="shell">
-          <div className="section-head">
-            <h2>Our Fleet</h2>
-            <Link href="/vehicles" style={{ color: '#087f70', fontWeight: 700 }}>View all →</Link>
+      {popularCards.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pb-10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2">
+                <i data-lucide="flame" className="w-6 h-6 text-orange-500"></i> Popular Vehicles
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">Our most-hired vehicles — ranked by actual booking history.</p>
+            </div>
+            <Link href="/vehicles?sort=popular" className="text-blue-600 text-sm font-medium hover:underline">
+              View all →
+            </Link>
           </div>
-          <div className="grid">
-            {cards.map((v) => (
+          <div className="veh-strip">
+            {popularCards.map((v) => (
               <VehicleCard
                 key={v.id}
                 id={v.id}
@@ -163,11 +222,70 @@ export default async function HomePage() {
                 daily_rate={v.daily_rate}
                 status={v.status}
                 photo={v.photo}
+                reg_no={v.reg_no}
+                hires={v.hires}
               />
             ))}
           </div>
-        </div>
+        </section>
+      )}
+
+      {categoryCards.map(
+        (section) =>
+          section.items.length > 0 && (
+            <section key={section.cat} className="max-w-7xl mx-auto px-6 pb-10">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2">
+                    <i data-lucide={section.icon} className="w-6 h-6 text-blue-600"></i> {section.label}
+                  </h2>
+                  <p className="text-sm text-slate-500 mt-1">{section.blurb}</p>
+                </div>
+                <Link
+                  href={`/vehicles?category=${section.cat}`}
+                  className="text-blue-600 text-sm font-medium hover:underline"
+                >
+                  View all →
+                </Link>
+              </div>
+              <div className="veh-strip">
+                {section.items.map((v) => (
+                  <VehicleCard
+                    key={v.id}
+                    id={v.id}
+                    make={v.make}
+                    model={v.model}
+                    year={v.year}
+                    transmission={v.transmission}
+                    fuel_type={v.fuel_type}
+                    seats={v.seats}
+                    daily_rate={v.daily_rate}
+                    status={v.status}
+                    photo={v.photo}
+                    reg_no={v.reg_no}
+                  />
+                ))}
+              </div>
+            </section>
+          )
+      )}
+
+      <section className="max-w-7xl mx-auto px-6 pb-16 text-center">
+        <Link href="/vehicles" className="btn-primary inline-flex !px-8 !py-3">
+          <i data-lucide="layout-grid" className="w-4 h-4"></i> Browse the full fleet
+        </Link>
       </section>
+
+      <style>{`
+        .veh-strip { display:flex; gap:1.25rem; overflow-x:auto; scroll-snap-type:x mandatory;
+          -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-bottom:.5rem; }
+        .veh-strip > * { flex:0 0 82%; scroll-snap-align:start; }
+        @media (min-width: 768px){
+          .veh-strip { display:grid; grid-template-columns:repeat(2, 1fr); overflow:visible; padding-bottom:0; }
+          .veh-strip > * { flex:none; }
+        }
+        @media (min-width: 1024px){ .veh-strip { grid-template-columns:repeat(4, 1fr); } }
+      `}</style>
     </main>
   );
 }

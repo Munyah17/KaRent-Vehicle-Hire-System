@@ -33,26 +33,32 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
     .maybeSingle();
   if (sigErr) throw new Error(`signatures: ${sigErr.message}`);
 
-  const [company] = await Promise.all([setting('company_name', 'KaRent')]);
+  const company = await setting('company_name', 'KaRent');
 
   return (
-    <div className="cp-doc">
-      <div className="noprint" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+    <div className="max-w-3xl mx-auto">
+      <style>{`@media print{.site-header,#clientSidebar,#siteDrawer,#drawerBackdrop,.noprint{display:none!important}}`}</style>
+      <div className="noprint mb-4 flex justify-end gap-3">
         <PrintButton />
       </div>
-      <div className="cp-doc-paper">
-        <div className="cp-doc-meta">
-          <span>{company} · {typedContract.title} · v{typedContract.template_version}</span>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-10">
+        <div className="text-xs text-slate-400 border-b border-gray-100 pb-3 mb-6 flex justify-between">
+          <span>
+            {company} · {typedContract.title} · v{typedContract.template_version}
+          </span>
           <Badge status={typedContract.status} />
         </div>
-        <div className="cp-doc-body" dangerouslySetInnerHTML={{ __html: typedContract.body }} />
+        <div
+          className="text-slate-700 text-sm leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: typedContract.body }}
+        />
         {sig && (
-          <div className="cp-doc-sig">
-            <p style={{ margin: 0, fontWeight: 700 }}>Signed by: {sig.signer_name}</p>
-            <p className="muted" style={{ margin: '4px 0 0', fontSize: '.78rem' }}>{fmtDateTime(sig.signed_at)}</p>
+          <div className="mt-10 border-t border-gray-100 pt-4 text-sm">
+            <p className="font-semibold">Signed by: {sig.signer_name}</p>
+            <p className="text-xs text-slate-400">{fmtDateTime(sig.signed_at)}</p>
             {sig.signature_data?.startsWith('data:image') && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={sig.signature_data} alt="Signature" style={{ marginTop: 10, height: 64 }} />
+              <img src={sig.signature_data} className="mt-2 h-16" alt="signature" />
             )}
           </div>
         )}

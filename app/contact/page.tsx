@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { setting } from '@/lib/settings';
 import ContactForm from '@/components/public/ContactForm';
-import { Phone, Mail, MapPin } from 'lucide-react';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'KaRent');
+  const name = await setting('company_name', 'Vehicle Hire');
   return { title: `Contact · ${name}` };
 }
 
@@ -20,33 +20,67 @@ export default async function ContactPage({
     setting('company_address', ''),
   ]);
 
+  const cleanPhone = phone ? phone.replace(/\s+/g, '') : '';
+
+  const channels: [string, string, string, string | null][] = [
+    ['phone', 'Call us', phone || '-', cleanPhone ? `tel:${cleanPhone}` : null],
+    ['mail', 'Email us', email || '-', email ? `mailto:${email}` : null],
+    ['map-pin', 'Visit us', address || '-', null],
+    ['clock', 'Working hours', 'Mon–Fri 8:00–17:30 · Sat 9:00–13:00 · Sun closed', null],
+  ];
+
   return (
     <main>
-      <section className="page-head">
-        <div className="shell">
-          <h1>Contact Us</h1>
-          <p className="muted">We are here to help with bookings, enquiries and feedback.</p>
+      <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-16 text-center">
+          <p className="text-blue-300 text-sm font-medium tracking-wide uppercase mb-2">We&apos;re here to help</p>
+          <h1 className="text-3xl md:text-4xl font-semibold">Get in touch with us</h1>
+          <p className="text-blue-200 mt-3 max-w-xl mx-auto">
+            Questions about a booking, our fleet, or corporate accounts — send a message and we&apos;ll reply within one
+            business day.
+          </p>
         </div>
       </section>
 
-      <section className="section">
-        <div className="shell contact-grid">
-          <div className="stack">
-            <div className="panel" style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <span style={{ width: 42, height: 42, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Phone className="w-5 h-5" /></span>
-              <div><p className="label" style={{ margin: 0 }}>Phone</p><p className="muted">{phone || '-'}</p></div>
-            </div>
-            <div className="panel" style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <span style={{ width: 42, height: 42, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Mail className="w-5 h-5" /></span>
-              <div><p className="label" style={{ margin: 0 }}>Email</p><p className="muted">{email || '-'}</p></div>
-            </div>
-            <div className="panel" style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <span style={{ width: 42, height: 42, borderRadius: 10, background: '#e7f6f1', color: '#08705f', display: 'grid', placeItems: 'center', flexShrink: 0 }}><MapPin className="w-5 h-5" /></span>
-              <div><p className="label" style={{ margin: 0 }}>Address</p><p className="muted">{address || '-'}</p></div>
+      <section className="max-w-6xl mx-auto px-6 -mt-10 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="space-y-4">
+            {channels.map(([icon, label, value, link]) => (
+              <div key={label} className="card flex items-start gap-4 hover:shadow-md transition-shadow">
+                <span className="icon-box bg-blue-600 text-white shadow-sm">
+                  <i data-lucide={icon} className="w-5 h-5"></i>
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-800">{label}</p>
+                  {link ? (
+                    <a href={link} className="text-sm text-blue-600 hover:underline break-words">
+                      {value}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-slate-500">{value}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+            <div className="rounded-xl bg-blue-50 border border-blue-100 p-5">
+              <p className="font-semibold text-slate-800 flex items-center gap-2">
+                <i data-lucide="headset" className="w-5 h-5 text-blue-600"></i> Need an urgent hire?
+              </p>
+              <p className="text-sm text-slate-600 mt-1">
+                Call us directly — same-day pickups are often possible on popular models.
+              </p>
+              <Link
+                href="/vehicles"
+                className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-medium mt-3 hover:underline"
+              >
+                Browse the fleet <i data-lucide="arrow-right" className="w-4 h-4"></i>
+              </Link>
             </div>
           </div>
-          <div className="panel">
-            <h2 style={{ marginTop: 0, marginBottom: 18 }}>Send a message</h2>
+
+          <div className="card lg:col-span-2 !p-8">
+            <h2 className="text-lg font-semibold text-slate-800">Send us a message</h2>
+            <p className="text-sm text-slate-500 mb-6">Fill in the form and our team will get back to you shortly.</p>
             <ContactForm initialSubject={subject} />
           </div>
         </div>

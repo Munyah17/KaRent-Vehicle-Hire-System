@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
 
 export default function SearchForm() {
   const router = useRouter();
@@ -27,18 +26,33 @@ export default function SearchForm() {
   }
 
   return (
-    <form onSubmit={submit} className="hero-card">
-      <div className="search-grid">
-        <div>
-          <label className="label">Pickup</label>
-          <input name="pickup" type="date" defaultValue={sp.get('pickup') || fmt(today)} min={fmt(today)} className="input" />
-        </div>
-        <div>
-          <label className="label">Return</label>
-          <input name="return" type="date" defaultValue={sp.get('return') || fmt(threeDays)} min={sp.get('pickup') || fmt(today)} className="input" />
-        </div>
-        <button className="button" style={{ width: '100%' }}><Search className="w-4 h-4" style={{ marginRight: 8 }} />Find a vehicle</button>
+    <form
+      onSubmit={submit}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end max-w-2xl"
+    >
+      <div className="flex-1">
+        <label className="block text-xs font-medium text-gray-500 mb-1">Pickup</label>
+        <input
+          type="date"
+          name="pickup"
+          defaultValue={sp.get('pickup') || fmt(today)}
+          min={fmt(today)}
+          className="input"
+        />
       </div>
+      <div className="flex-1">
+        <label className="block text-xs font-medium text-gray-500 mb-1">Return</label>
+        <input
+          type="date"
+          name="return"
+          defaultValue={sp.get('return') || fmt(threeDays)}
+          min={sp.get('pickup') || fmt(today)}
+          className="input"
+        />
+      </div>
+      <button className="btn-primary !px-6 justify-center">
+        <i data-lucide="search" className="w-4 h-4"></i> Find a vehicle
+      </button>
     </form>
   );
 }
