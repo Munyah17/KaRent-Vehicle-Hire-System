@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase';
 import { getSession } from '@/lib/auth';
 import {
   getVehicle,
-  getPrimaryPhoto,
   daysBetween,
   computeTotal,
   formatCurrency,
@@ -40,9 +39,8 @@ export default async function VehicleDetailPage({
   const vehicle = await getVehicle(Number(id));
   if (!vehicle) notFound();
 
-  const [session, photo, photos] = await Promise.all([
+  const [session, photos] = await Promise.all([
     getSession(),
-    getPrimaryPhoto(vehicle.id),
     supabase
       .from('vehicle_photos')
       .select('file_path, is_primary')
@@ -83,7 +81,7 @@ export default async function VehicleDetailPage({
   const gallery =
     (photos.data ?? []).length
       ? (photos.data ?? []).map((p) => `/uploads/${p.file_path}`)
-      : [photo];
+      : ['/assets/img/car-placeholder.jpg'];
 
   const bookHref = session?.role === 'CLIENT'
     ? `/client?vehicle=${vehicle.id}&pickup=${encodeURIComponent(pickup)}&return=${encodeURIComponent(returnAt)}`

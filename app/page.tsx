@@ -4,7 +4,7 @@ import { setting } from '@/lib/settings';
 import HeroSlider, { HeroSlide } from '@/components/public/HeroSlider';
 import SearchForm from '@/components/public/SearchForm';
 import VehicleCard from '@/components/public/VehicleCard';
-import { getPrimaryPhoto } from '@/components/public/data';
+import { getPrimaryPhotos } from '@/components/public/data';
 
 type DbVehicle = {
   id: number;
@@ -110,27 +110,24 @@ export default async function HomePage() {
     byCategory[cat] = vehicles.filter((v) => v.category === cat).slice(0, 6);
   }
 
-  const enrich = async (list: DbVehicle[], includeHires = false) =>
-    Promise.all(
-      list.map(async (v) => ({
-        ...v,
-        photo: await getPrimaryPhoto(v.id),
-        hires: includeHires ? (hireCounts[v.id] ?? 0) : undefined,
-      }))
-    );
+  // One photo query for every vehicle shown on this page — no N+1.
+  const photoMap = await getPrimaryPhotos(vehicles.map((v) => v.id));
 
-  const [popularCards, categoryCards] = await Promise.all([
-    enrich(popular, true),
-    Promise.all(
-      Object.keys(categories).map(async (cat) => ({
-        cat,
-        label: categories[cat][0],
-        icon: categories[cat][1],
-        blurb: categories[cat][2],
-        items: await enrich(byCategory[cat]),
-      }))
-    ),
-  ]);
+  const enrich = (list: DbVehicle[], includeHires = false) =>
+    list.map((v) => ({
+      ...v,
+      photo: photoMap[v.id] ?? '/assets/img/car-placeholder.jpg',
+      hires: includeHires ? (hireCounts[v.id] ?? 0) : undefined,
+    }));
+
+  const popularCards = enrich(popular, true);
+  const categoryCards = Object.keys(categories).map((cat) => ({
+    cat,
+    label: categories[cat][0],
+    icon: categories[cat][1],
+    blurb: categories[cat][2],
+    items: enrich(byCategory[cat]),
+  }));
 
   return (
     <main>
@@ -277,13 +274,8 @@ export default async function HomePage() {
       </section>
 
       <style>{`
-        .veh-strip { display:flex; gap:1.25rem; overflow-x:auto; scroll-snap-type:x mandatory;
-          -webkit-overflow-scrolling:touch; scrollbar-width:thin; padding-bottom:.5rem; }
-        .veh-strip > * { flex:0 0 82%; scroll-snap-align:start; }
-        @media (min-width: 768px){
-          .veh-strip { display:grid; grid-template-columns:repeat(2, 1fr); overflow:visible; padding-bottom:0; }
-          .veh-strip > * { flex:none; }
-        }
+        .veh-strip { display:grid; grid-template-columns:repeat(1, 1fr); gap:1.25rem; }
+        @media (min-width: 640px){ .veh-strip { grid-template-columns:repeat(2, 1fr); } }
         @media (min-width: 1024px){ .veh-strip { grid-template-columns:repeat(4, 1fr); } }
       `}</style>
     </main>

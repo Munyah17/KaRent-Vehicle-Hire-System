@@ -62,19 +62,27 @@ function toVehicle(row: DbVehicle): Vehicle {
 }
 
 export async function getPrimaryPhoto(vehicleId: number): Promise<string> {
+  const map = await getPrimaryPhotos([vehicleId]);
+  return map[vehicleId] ?? '/assets/img/car-placeholder.jpg';
+}
+
+/** One query for every vehicle's primary photo — avoids N+1 on grids. */
+export async function getPrimaryPhotos(vehicleIds: number[]): Promise<Record<number, string>> {
+  if (!vehicleIds.length) return {};
   const { data, error } = await supabase
     .from('vehicle_photos')
-    .select('file_path, is_primary')
-    .eq('vehicle_id', vehicleId)
+    .select('vehicle_id, file_path, is_primary, sort_order')
+    .in('vehicle_id', vehicleIds)
     .eq('is_public', true)
     .order('is_primary', { ascending: false })
-    .order('sort_order', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .order('sort_order', { ascending: true });
 
   if (error) throw error;
-  if (!data) return '/assets/img/car-placeholder.jpg';
-  return `/uploads/${data.file_path}`;
+  const map: Record<number, string> = {};
+  for (const row of data ?? []) {
+    if (!map[row.vehicle_id]) map[row.vehicle_id] = `/uploads/${row.file_path}`;
+  }
+  return map;
 }
 
 export async function getVehicle(id: number): Promise<Vehicle | null> {
@@ -111,21 +119,21 @@ export async function listVehicles(filters?: { pickup?: string; return?: string 
 
   const p = formatDate(pickup);
   const r = formatDate(returnAt);
+  const ids = rows.map((v) => v.id);
+  if (!ids.length) return rows;
 
-  const available: Vehicle[] = [];
-  for (const v of rows) {
-    const { count, error: countError } = await supabase
-      .from('bookings')
-      .select('id', { count: 'exact', head: true })
-      .eq('vehicle_id', v.id)
-      .in('status', ['confirmed', 'active', 'pending'])
-      .lt('pickup_at', `${r} 00:00:00`)
-      .gt('return_at', `${p} 00:00:00`);
+  // One query for all overlapping bookings instead of one per vehicle.
+  const { data: overlaps, error: overlapError } = await supabase
+    .from('bookings')
+    .select('vehicle_id')
+    .in('vehicle_id', ids)
+    .in('status', ['confirmed', 'active', 'pending'])
+    .lt('pickup_at', `${r} 00:00:00`)
+    .gt('return_at', `${p} 00:00:00`);
 
-    if (countError) throw countError;
-    if ((count ?? 0) === 0) available.push(v);
-  }
-  return available;
+  if (overlapError) throw overlapError;
+  const busy = new Set((overlaps ?? []).map((b) => b.vehicle_id));
+  return rows.filter((v) => !busy.has(v.id));
 }
 
 export function formatCurrency(amount: number): string {

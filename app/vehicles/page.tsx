@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { setting } from '@/lib/settings';
 import VehicleCard from '@/components/public/VehicleCard';
 import VehicleFilters from '@/components/public/VehicleFilters';
-import { getPrimaryPhoto, listVehicles } from '@/components/public/data';
+import { getPrimaryPhotos, listVehicles } from '@/components/public/data';
 
 type VehicleRow = Awaited<ReturnType<typeof listVehicles>>[number] & { category?: string };
 
@@ -75,12 +75,11 @@ export default async function VehiclesPage({
     // We leave the list as-is to match the PHP intent (popular sort is a flag only here).
   }
 
-  const cards = await Promise.all(
-    vehicles.map(async (v) => {
-      const photo = await getPrimaryPhoto(v.id);
-      return { ...v, photo };
-    })
-  );
+  const photoMap = await getPrimaryPhotos(vehicles.map((v) => v.id));
+  const cards = vehicles.map((v) => ({
+    ...v,
+    photo: photoMap[v.id] ?? '/assets/img/car-placeholder.jpg',
+  }));
 
   return (
     <main>

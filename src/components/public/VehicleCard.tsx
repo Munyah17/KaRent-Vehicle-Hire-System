@@ -37,7 +37,7 @@ export default function VehicleCard({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       <Link href={vehUrl} className="block h-60 shrink-0">
-        <img src={photo} className="w-full h-full object-cover" alt={`${make} ${model}`} />
+        <img src={photo} className="w-full h-full object-cover" alt={`${make} ${model}`} loading="lazy" decoding="async" />
       </Link>
       <div className="p-4 flex flex-col flex-1">
         <div className="h-6 flex items-center justify-between gap-2">
