@@ -95,7 +95,7 @@ export default async function HomePage() {
 
   const popular = [...vehicles]
     .sort((a, b) => (hireCounts[b.id] ?? 0) - (hireCounts[a.id] ?? 0) || a.daily_rate - b.daily_rate)
-    .slice(0, 6);
+    .slice(0, 4);
 
   const categories: Record<string, [string, string, string]> = {
     budget: ['Budget Vehicles', 'wallet', 'Economical daily drivers — lowest rates in the fleet.'],
@@ -109,7 +109,7 @@ export default async function HomePage() {
 
   const byCategory: Record<string, DbVehicle[]> = {};
   for (const [cat] of Object.entries(categories)) {
-    byCategory[cat] = vehicles.filter((v) => v.category === cat).slice(0, 6);
+    byCategory[cat] = vehicles.filter((v) => v.category === cat).slice(0, 4);
   }
 
   // One photo query for every vehicle shown on this page — no N+1.
@@ -198,9 +198,7 @@ export default async function HomePage() {
         <section className="max-w-7xl mx-auto px-6 pb-10">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2">
-                <i data-lucide="flame" className="w-6 h-6 text-orange-500"></i> Popular Vehicles
-              </h2>
+              <h2 className="text-2xl font-semibold text-slate-800">Popular Vehicles</h2>
               <p className="text-sm text-slate-500 mt-1">Our most-hired vehicles — ranked by actual booking history.</p>
             </div>
             <Link href="/vehicles?sort=popular" className="text-blue-600 text-sm font-medium hover:underline">
@@ -235,9 +233,7 @@ export default async function HomePage() {
             <section key={section.cat} className="max-w-7xl mx-auto px-6 pb-10">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2">
-                    <i data-lucide={section.icon} className="w-6 h-6 text-blue-600"></i> {section.label}
-                  </h2>
+                  <h2 className="text-2xl font-semibold text-slate-800">{section.label}</h2>
                   <p className="text-sm text-slate-500 mt-1">{section.blurb}</p>
                 </div>
                 <Link
