@@ -1,10 +1,14 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useRef, useActionState } from 'react';
 import { loginAction, LoginState } from '@/app/login/action';
+
+const DEMO = { email: 'john@demo.test', password: 'Client@123' };
 
 export default function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={action} className="space-y-4">
@@ -22,15 +26,30 @@ export default function LoginForm() {
       )}
       <div>
         <label className="label">Email</label>
-        <input type="email" name="email" required className="input" placeholder="you@example.com" />
+        <input ref={emailRef} type="email" name="email" required className="input" placeholder="you@example.com" />
       </div>
       <div>
         <label className="label">Password</label>
-        <input type="password" name="password" required className="input" />
+        <input ref={passRef} type="password" name="password" required className="input" />
       </div>
       <button className="btn-primary w-full justify-center !py-2.5" disabled={pending}>
         Sign In
       </button>
+      <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-800">
+        <div className="flex items-center justify-between gap-2">
+          <span><strong>Demo client:</strong> {DEMO.email} / {DEMO.password}</span>
+          <button
+            type="button"
+            onClick={() => {
+              if (emailRef.current) emailRef.current.value = DEMO.email;
+              if (passRef.current) passRef.current.value = DEMO.password;
+            }}
+            className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded px-2.5 py-1 font-medium"
+          >
+            Fill
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

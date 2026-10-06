@@ -22,7 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const h = await headers();
   const path = h.get('x-invoke-path') || h.get('x-matched-path') || '/';
-  const isPublicRoute = !path.startsWith('/admin') && !path.startsWith('/client');
+  const isPublicRoute =
+    !path.startsWith('/admin') && !path.startsWith('/client') && !path.startsWith('/super-admin');
 
   const settings = {
     companyName: await setting('company_name', 'Vehicle Hire'),
