@@ -6,7 +6,7 @@ storage/logs/*
 storage/contracts/*
 storage/fdms/*
 storage/uploads/*
-public/uploads/*
+# Vehicle/demo photos are committed so Vercel git-deploys include them
 !storage/uploads/.htaccess
 !public/uploads/.htaccess
 
