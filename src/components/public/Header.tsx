@@ -6,9 +6,23 @@ import { usePathname } from 'next/navigation';
 import type { SessionUser } from '@/lib/auth';
 import { logoutAction } from './authActions';
 
-export default function Header({ companyName, user }: { companyName: string; user: SessionUser | null }) {
+export default function Header({ companyName }: { companyName: string }) {
   const pathname = usePathname() || '/';
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState<SessionUser | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    fetch('/api/me')
+      .then((r) => r.json())
+      .then((d) => {
+        if (live && d.user) setUser(d.user);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
 
   const navItems = [
     { href: '/', label: 'Home', key: 'home' },

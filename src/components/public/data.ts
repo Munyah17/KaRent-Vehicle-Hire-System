@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export type Vehicle = {
@@ -85,7 +86,7 @@ export async function getPrimaryPhotos(vehicleIds: number[]): Promise<Record<num
   return map;
 }
 
-export async function getVehicle(id: number): Promise<Vehicle | null> {
+export const getVehicle = cache(async (id: number): Promise<Vehicle | null> => {
   const { data, error } = await supabase
     .from('vehicles')
     .select('*')
@@ -96,7 +97,7 @@ export async function getVehicle(id: number): Promise<Vehicle | null> {
   if (error) throw error;
   if (!data) return null;
   return toVehicle(data as DbVehicle);
-}
+});
 
 export async function listVehicles(filters?: { pickup?: string; return?: string }): Promise<Vehicle[]> {
   const { data, error } = await supabase
@@ -106,6 +107,7 @@ export async function listVehicles(filters?: { pickup?: string; return?: string 
     .in('status', ['available', 'reserved', 'on_hire'])
     .order('is_featured', { ascending: false })
     .order('daily_rate', { ascending: true })
+    .limit(200)
     .returns<DbVehicle[]>();
 
   if (error) throw error;

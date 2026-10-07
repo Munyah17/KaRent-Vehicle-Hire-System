@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useActionState } from 'react';
-import { loginAction, LoginState } from '@/app/login/action';
+import { loginAction, LoginState } from '@/app/(public)/login/action';
 
 const DEMO = { email: 'john@demo.test', password: 'Client@123' };
 

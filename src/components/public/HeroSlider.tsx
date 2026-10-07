@@ -49,6 +49,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             alt={s.title}
             className="absolute inset-0 w-full h-full object-cover"
             loading={idx === 0 ? 'eager' : 'lazy'}
+            fetchPriority={idx === 0 ? 'high' : 'auto'}
           />
           <div className="absolute inset-0 bg-black" style={{ opacity: s.overlay / 100 }}></div>
           <div className="relative z-10 h-full flex items-center">

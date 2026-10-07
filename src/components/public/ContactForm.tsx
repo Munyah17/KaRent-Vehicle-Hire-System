@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { submitContact, ContactState } from '@/app/contact/action';
+import { submitContact, ContactState } from '@/app/(public)/contact/action';
 
 export default function ContactForm({ initialSubject }: { initialSubject: string }) {
   const [state, action, pending] = useActionState<ContactState, FormData>(submitContact, null);

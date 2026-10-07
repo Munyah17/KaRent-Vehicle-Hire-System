@@ -62,6 +62,8 @@ export default async function HomePage() {
       .from('bookings')
       .select('vehicle_id')
       .in('status', ['confirmed', 'active', 'completed', 'overdue'])
+      .gte('created_at', new Date(Date.now() - 180 * 864e5).toISOString())
+      .limit(1000)
       .returns<{ vehicle_id: number }[]>(),
   ]);
 

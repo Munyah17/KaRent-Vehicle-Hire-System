@@ -18,6 +18,20 @@ export default async function SuperAdminPage({
   const session = await getSession();
   if (session?.role === 'SUPER_ADMIN') redirect('/admin/dashboard');
 
+  // Setup page is only usable until the first SUPER_ADMIN exists.
+  const { data: saRole } = await supabase
+    .from('roles')
+    .select('id')
+    .eq('name', 'SUPER_ADMIN')
+    .maybeSingle();
+  if (saRole) {
+    const { count } = await supabase
+      .from('users')
+      .select('id', { count: 'exact', head: true })
+      .eq('role_id', saRole.id);
+    if ((count ?? 0) > 0) redirect('/admin/login');
+  }
+
   const params = await searchParams;
   const err = params?.error;
 
