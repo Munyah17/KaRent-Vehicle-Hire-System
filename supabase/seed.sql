@@ -329,9 +329,9 @@ pursuing formal remedies.</p>', 1);
 -- ---------- Settings ----------
 insert into public.settings ("key", "value") values
   ('company_name','Vehicle Hire (Pvt) Ltd'),
-  ('company_email','bookings@vehiclehire.demo'),
+  ('company_email','admin@globalsaceweb.co.zw'),
   ('company_phone','+263 242 700 000'),
-  ('company_address','123 Samora Machel Ave, Harare, Zimbabwe'),
+  ('company_address','24 Midlothian Avenue, Harare, Zimbabwe'),
   ('currency','USD'),
   ('currency_symbol','$'),
   ('booking_min_hours','24'),
