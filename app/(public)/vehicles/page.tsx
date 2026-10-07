@@ -7,10 +7,7 @@ import { getPrimaryPhotos, listVehicles } from '@/components/public/data';
 
 type VehicleRow = Awaited<ReturnType<typeof listVehicles>>[number] & { category?: string };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'Vehicle Hire');
-  return { title: `Vehicles · ${name}` };
-}
+export const metadata: Metadata = { title: 'Vehicles' };
 
 export default async function VehiclesPage({
   searchParams,

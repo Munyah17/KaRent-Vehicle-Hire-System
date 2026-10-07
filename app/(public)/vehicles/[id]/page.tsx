@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { setting } from '@/lib/settings';
 import { supabase } from '@/lib/supabase';
 import { getSession } from '@/lib/auth';
 import {
@@ -21,9 +20,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const vehicle = await getVehicle(Number(id));
-  const name = await setting('company_name', 'Vehicle Hire');
   return {
-    title: vehicle ? `${vehicle.make} ${vehicle.model} · ${name}` : 'Vehicle · ' + name,
+    title: vehicle ? `${vehicle.make} ${vehicle.model}` : 'Vehicle',
   };
 }
 

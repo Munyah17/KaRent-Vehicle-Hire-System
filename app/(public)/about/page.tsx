@@ -2,10 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { setting } from '@/lib/settings';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'Vehicle Hire');
-  return { title: `About · ${name}` };
-}
+export const metadata: Metadata = { title: 'About' };
 
 export default async function AboutPage() {
   const companyName = await setting('company_name', 'Vehicle Hire');

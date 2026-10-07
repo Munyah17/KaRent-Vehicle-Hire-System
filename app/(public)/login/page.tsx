@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
-import { setting } from '@/lib/settings';
 import LoginForm from '@/components/public/LoginForm';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'Vehicle Hire');
-  return { title: `Sign In · ${name}` };
-}
+export const metadata: Metadata = { title: 'Sign In' };
 
 export default async function LoginPage() {
   return (

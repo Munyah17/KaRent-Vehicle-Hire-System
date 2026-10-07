@@ -3,10 +3,7 @@ import Link from 'next/link';
 import { setting } from '@/lib/settings';
 import ContactForm from '@/components/public/ContactForm';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'Vehicle Hire');
-  return { title: `Contact · ${name}` };
-}
+export const metadata: Metadata = { title: 'Contact' };
 
 export default async function ContactPage({
   searchParams,

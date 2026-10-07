@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
-import { setting } from '@/lib/settings';
 import RegisterForm from '@/components/public/RegisterForm';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const name = await setting('company_name', 'Vehicle Hire');
-  return { title: `Create Account · ${name}` };
-}
+export const metadata: Metadata = { title: 'Create Account' };
 
 export default async function RegisterPage() {
   return (
