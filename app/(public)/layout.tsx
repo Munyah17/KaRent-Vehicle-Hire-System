@@ -29,7 +29,11 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
-      <link rel="stylesheet" href={`/assets/css/app.css?v=${assetV('assets/css/app.css')}`} />
+      <link
+        rel="stylesheet"
+        href={`/assets/css/app.css?v=${assetV('assets/css/app.css')}`}
+        precedence="default"
+      />
       <script src={`/assets/vendor/lucide.min.js?v=${assetV('assets/vendor/lucide.min.js')}`} defer />
       <script src={`/assets/js/theme.js?v=${assetV('assets/js/theme.js')}`} defer />
       <Header companyName={settings.companyName} />

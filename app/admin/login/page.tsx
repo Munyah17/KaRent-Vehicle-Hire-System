@@ -99,10 +99,10 @@ export default async function AdminLoginPage({
 
   return (
     <>
-      <link href="/assets/admin/css/font-face.css" rel="stylesheet" />
-      <link href="/assets/admin/vendor/bootstrap-5.3.8.min.css" rel="stylesheet" />
-      <link href="/assets/admin/css/theme.css" rel="stylesheet" />
-      <link href="/assets/admin/css/app.css" rel="stylesheet" />
+      <link href="/assets/admin/css/font-face.css" rel="stylesheet" precedence="default" />
+      <link href="/assets/admin/vendor/bootstrap-5.3.8.min.css" rel="stylesheet" precedence="default" />
+      <link href="/assets/admin/css/theme.css" rel="stylesheet" precedence="default" />
+      <link href="/assets/admin/css/app.css" rel="stylesheet" precedence="default" />
       <script src="/assets/vendor/lucide.min.js" defer></script>
       <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       <script dangerouslySetInnerHTML={{ __html: "document.body.className = 'app auth-page';" }} />

@@ -21,17 +21,27 @@
         apply(current() === 'dark' ? 'light' : 'dark');
     };
 
-    document.addEventListener('DOMContentLoaded', function () {
+    function cookieTheme() {
+        var m = document.cookie.match(/theme=(dark|light)/);
+        return m ? m[1] : null;
+    }
+
+    function init() {
         // Wire every toggle button
         document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
             btn.addEventListener('click', window.themeToggle);
             btn.setAttribute('aria-label', 'Toggle dark / light mode');
         });
 
-        // First-visit chooser
+        // First-visit chooser — honour both localStorage and the cookie
+        // (some browsers/webviews don't persist localStorage).
         var stored = null;
         try { stored = localStorage.getItem(KEY); } catch (e) {}
-        if (stored) return;
+        stored = stored || cookieTheme();
+        if (stored) {
+            try { localStorage.setItem(KEY, stored); } catch (e) {}
+            return;
+        }
 
         var box = document.createElement('div');
         box.id = 'theme-chooser';
@@ -53,5 +63,11 @@
                 box.remove();
             });
         });
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();
