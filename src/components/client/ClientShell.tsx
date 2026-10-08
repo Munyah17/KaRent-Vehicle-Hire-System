@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   type LucideIcon,
   LayoutDashboard,
-  Car,
   CalendarCheck,
   CreditCard,
   Wallet,
@@ -28,7 +27,7 @@ import { logoutAction } from '@/app/client/actions';
 
 const NAV_ITEMS: { href: string; label: string; icon: LucideIcon; exact?: boolean }[] = [
   { href: '/client', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/vehicles', label: 'Book a Vehicle', icon: Car, exact: true },
+  { href: '/vehicles', label: 'Book a Vehicle', icon: CalendarPlus, exact: true },
   { href: '/client/bookings', label: 'My Bookings', icon: CalendarCheck },
   { href: '/client/payments', label: 'Payments', icon: CreditCard },
   { href: '/client/wallet', label: 'Wallet', icon: Wallet },

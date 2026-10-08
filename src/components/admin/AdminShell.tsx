@@ -34,7 +34,7 @@ const nav: NavItem[] = [
   {
     key: 'vehicles',
     label: 'Fleet',
-    icon: 'fa-car-side',
+    icon: 'fa-list',
     children: [
       { key: 'vehicles', label: 'Vehicles', href: '/admin/vehicles' },
       { key: 'maintenance', label: 'Maintenance', href: '#' },

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  Wallet, Car, CarFront, Sparkles, Truck, Wrench,
+  Wallet, BadgeCheck, Mountain, Sparkles, Truck, Wrench,
   ShieldCheck, Banknote, Headphones, CreditCard, FileCheck, MapPin,
   type LucideIcon,
 } from 'lucide-react';
@@ -68,8 +68,8 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {([
               [Wallet, 'Budget', 'Cheapest daily rates — hatchbacks and compact city cars.'],
-              [Car, 'Sedans', 'Comfortable saloons for business travel and family trips.'],
-              [CarFront, 'SUVs & 4x4s', 'Ground clearance and space for rough roads and long journeys.'],
+              [BadgeCheck, 'Sedans', 'Comfortable saloons for business travel and family trips.'],
+              [Mountain, 'SUVs & 4x4s', 'Ground clearance and space for rough roads and long journeys.'],
               [Sparkles, 'Premium', 'Executive and luxury models for occasions that matter.'],
               [Truck, 'Trucks & Pickups', 'Double cabs and load movers for work crews and sites.'],
               [Wrench, 'Utility', 'Work vehicles for field, farm and site operations.'],

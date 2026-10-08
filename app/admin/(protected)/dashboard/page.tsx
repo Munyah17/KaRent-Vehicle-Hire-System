@@ -75,7 +75,7 @@ export default async function DashboardPage() {
 
   const kpis = [
     { label: 'Bookings', value: map.bookings, sub: 'total reservations', icon: 'fa-calendar-check', color: 'c1' },
-    { label: 'Vehicles', value: map.vehicles, sub: 'fleet size', icon: 'fa-car-side', color: 'c2' },
+    { label: 'Vehicles', value: map.vehicles, sub: 'fleet size', icon: 'fa-list', color: 'c2' },
     { label: 'Clients', value: map.clients, sub: 'registered clients', icon: 'fa-users', color: 'c3' },
     { label: 'Payments', value: map.payments, sub: 'transactions', icon: 'fa-credit-card', color: 'c4' },
   ];
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
                   >
                     <div className="flex items-center gap-3">
                       <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                        <i data-lucide="car" className="w-4 h-4"></i>
+                        <i data-lucide="calendar-check" className="w-4 h-4"></i>
                       </span>
                       <div>
                         <p className="text-sm font-medium text-slate-800">

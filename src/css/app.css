@@ -202,3 +202,21 @@ html.dark .theme-choice:hover { border-color: #4272d7; }
 html.dark #siteDrawer { background: #1c1f24; color: #e9ecef; }
 html.dark #siteDrawer a { color: #cbd5e1; }
 html.dark #siteDrawer .drawer-link:hover { background: #23262c; }
+
+/* Admin portal: CoolAdmin's menu-sidebar has no mobile off-canvas or
+   backdrop styles — add them so it slides in and taps outside close it. */
+@media (max-width: 991px) {
+    .menu-sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        z-index: 98;
+    }
+    .menu-sidebar.show-sidebar {
+        transform: translateX(0);
+        box-shadow: 0 0 40px rgba(0, 0, 0, .25);
+    }
+    .sidebar-backdrop {
+        position: fixed; inset: 0; z-index: 97;
+        background: rgba(15, 17, 21, .5);
+    }
+}

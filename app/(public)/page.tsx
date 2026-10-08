@@ -102,8 +102,8 @@ export default async function HomePage() {
 
   const categories: Record<string, [string, string, string]> = {
     budget: ['Budget Vehicles', 'wallet', 'Economical daily drivers — lowest rates in the fleet.'],
-    sedan: ['Sedans', 'car', 'Comfortable saloons for business and family trips.'],
-    suv: ['SUVs & 4x4s', 'car-front', 'Space, ground clearance and all-road confidence.'],
+    sedan: ['Sedans', 'badge-check', 'Comfortable saloons for business and family trips.'],
+    suv: ['SUVs & 4x4s', 'mountain', 'Space, ground clearance and all-road confidence.'],
     premium: ['Premium Vehicles', 'sparkles', 'Executive and luxury models for special occasions.'],
     truck: ['Trucks & Pickups', 'truck', 'Load-moving pickups and trucks for work crews.'],
     utility: ['People Movers & Vans', 'bus', 'Minibuses and 7-seaters for groups, staff and events.'],
