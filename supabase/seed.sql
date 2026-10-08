@@ -4,7 +4,7 @@
 -- Demo passwords (hashes are portable bcrypt $2y$):
 --   admin@demo.test / Admin@123
 --   staff@demo.test / Staff@123
---   john@demo.test  / Client@123
+--   munyah@demo.test  / Client@123
 -- Real-person super-admin record and credentials are omitted.
 -- ============================================================
 
@@ -52,7 +52,7 @@ values
    '$2y$10$zLhbMwGS.BgVy3X78A1oDeojDUF8bPCAv0DOpXCfFoMqYZJrt8Pz6', 'active'),
   (2, 2, 'Tariro Moyo', 'staff@demo.test', null, '+263 770 000 002',
    '$2y$10$AFoPCeMTuFI3mSu8zGpFpOvUZ2OR3BnmWfUgMyoJiPAUqy4mN8qOq', 'active'),
-  (3, 3, 'John Dube', 'john@demo.test', null, '+263 771 234 567',
+  (3, 3, 'Munyah Dube', 'munyah@demo.test', null, '+263 771 234 567',
    '$2y$10$D905zgOrMFX7psdDZlvjhuajZ/0XBKjv751q7UNwZwjFeeoeQYeUe', 'active'),
   (4, 3, 'Sarah Nkomo', 'sarah@demo.test', null, '+263 772 345 678',
    '$2y$10$D905zgOrMFX7psdDZlvjhuajZ/0XBKjv751q7UNwZwjFeeoeQYeUe', 'active'),
@@ -66,7 +66,7 @@ insert into public.clients (id, user_id, client_no, full_name, dob, phone, email
                             national_id, licence_no, licence_expiry, kyc_status, source)
 overriding system value
 values
-  (1, 3, 'CL-1001', 'John Dube', '1985-04-12', '+263 771 234 567', 'john@demo.test',
+  (1, 3, 'CL-1001', 'Munyah Dube', '1985-04-12', '+263 771 234 567', 'munyah@demo.test',
    '12 Borrowdale Rd, Harare', '63-1234567-A-42', 'D458712', '2028-06-30', 'verified', 'online'),
   (2, 4, 'CL-1002', 'Sarah Nkomo', '1990-11-03', '+263 772 345 678', 'sarah@demo.test',
    '45 Hillside, Bulawayo', '08-7654321-B-10', 'D882110', '2027-01-15', 'verified', 'online'),

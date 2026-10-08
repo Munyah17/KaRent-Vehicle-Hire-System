@@ -35,7 +35,7 @@ workspace is JavaScript-only. Do not create .php files here.
 - Deploy: `git push` (auto) or `npx vercel deploy --prod` then
   `vercel alias set <deployment> rentacar.munya.co.zw`.
 - Demo accounts (supabase/seed.sql): `admin@demo.test/Admin@123`,
-  `staff@demo.test/Staff@123`, `john@demo.test/Client@123`.
+  `staff@demo.test/Staff@123`, `munyah@demo.test/Client@123`.
 
 ## Conventions
 

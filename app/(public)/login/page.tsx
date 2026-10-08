@@ -13,7 +13,7 @@ export default async function LoginPage() {
           </div>
           <div className="mt-4 rounded-lg bg-blue-50 border border-blue-100 p-4 text-xs text-blue-800">
             <p className="font-semibold mb-1">Demo client account</p>
-            <p>john@demo.test / Client@123</p>
+            <p>munyah@demo.test / Client@123</p>
             <p className="mt-1 text-blue-600">
               Staff? Use the <a href="/admin/login" className="underline">staff sign-in</a>.
             </p>

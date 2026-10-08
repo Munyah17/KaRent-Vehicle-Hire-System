@@ -10,9 +10,10 @@ function normalizeHash(h: string): string {
   return h.replace(/^\$2y\$/, '$2a$');
 }
 
-/** Strip characters that would break a PostgREST `or` filter expression. */
+/** Strip characters that would break a PostgREST `or` filter expression.
+ *  Dots are allowed — values are double-quoted, so `admin@demo.test` is safe. */
 function orSafe(value: string): string {
-  return value.replace(/[(),.\\"]/g, '');
+  return value.replace(/[(),\\"]/g, '');
 }
 
 interface AdminUserRow {

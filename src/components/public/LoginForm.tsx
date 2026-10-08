@@ -4,7 +4,7 @@ import { useRef, useActionState } from 'react';
 import { LogIn } from 'lucide-react';
 import { loginAction, LoginState } from '@/app/(public)/login/action';
 
-const DEMO = { email: 'john@demo.test', password: 'Client@123' };
+const DEMO = { email: 'munyah@demo.test', password: 'Client@123' };
 
 export default function LoginForm() {
   const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, null);

@@ -273,21 +273,6 @@ export default async function HomePage() {
           <LayoutGrid className="w-4 h-4" /> Browse the full fleet
         </Link>
       </section>
-
-      <style>{`
-        /* Mobile: one card per swipe — horizontal snap carousel, hidden scrollbar */
-        .veh-strip { display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory;
-          -webkit-overflow-scrolling:touch; scrollbar-width:none; -ms-overflow-style:none;
-          margin:0 -1.5rem; padding:0 1.5rem .25rem; }
-        .veh-strip::-webkit-scrollbar { display:none; }
-        .veh-strip > * { flex:0 0 88%; scroll-snap-align:start; }
-        @media (min-width: 640px){
-          .veh-strip { display:grid; grid-template-columns:repeat(2, 1fr); overflow:visible;
-            margin:0; padding:0; }
-          .veh-strip > * { flex:none; }
-        }
-        @media (min-width: 1024px){ .veh-strip { grid-template-columns:repeat(4, 1fr); } }
-      `}</style>
     </main>
   );
 }

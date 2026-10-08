@@ -78,11 +78,50 @@ export default async function VehiclesPage({
     photo: photoMap[v.id] ?? '/assets/img/car-placeholder.jpg',
   }));
 
+  // Searching by dates/text/specs → flat result grid. Otherwise the fleet is
+  // grouped into ordered category sections (mobile: snap-carousel strips).
+  const isSearching = !!(q || fuel || transmission || maxPrice !== null || (pickup && returnAt) || sort);
+  const orderedCats = Object.keys(catLabels);
+  const sections = isSearching
+    ? []
+    : orderedCats
+        .filter((cat) => !catLabels[category] || cat === category)
+        .map((cat) => ({
+          cat,
+          label: catLabels[cat],
+          items: cards.filter((v) => v.category?.toLowerCase() === cat),
+        }))
+        .filter((s) => s.items.length > 0);
+
+  // Anything in an unmapped category still needs a home.
+  if (!isSearching && !catLabels[category]) {
+    const shown = new Set(sections.flatMap((s) => s.items.map((v) => v.id)));
+    const rest = cards.filter((v) => !shown.has(v.id));
+    if (rest.length) sections.push({ cat: 'other', label: 'Other Vehicles', items: rest });
+  }
+
+  const card = (v: (typeof cards)[number]) => (
+    <VehicleCard
+      key={v.id}
+      id={v.id}
+      make={v.make}
+      model={v.model}
+      year={v.year}
+      transmission={v.transmission}
+      fuel_type={v.fuel_type}
+      seats={v.seats}
+      daily_rate={v.daily_rate}
+      status={v.status}
+      photo={v.photo}
+      reg_no={v.reg_no}
+    />
+  );
+
   return (
     <main>
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-2xl font-semibold text-slate-800 mb-5">Available Vehicles</h1>
+          <h1 className="text-2xl font-semibold text-slate-800 mb-5">Book a Vehicle</h1>
           <VehicleFilters />
         </div>
       </div>
@@ -91,24 +130,25 @@ export default async function VehiclesPage({
         <p className="text-sm text-slate-500 mb-6">
           {cards.length} vehicle{cards.length === 1 ? '' : 's'} {pickup && returnAt ? 'available for your dates' : 'in our fleet'}
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {cards.map((v) => (
-            <VehicleCard
-              key={v.id}
-              id={v.id}
-              make={v.make}
-              model={v.model}
-              year={v.year}
-              transmission={v.transmission}
-              fuel_type={v.fuel_type}
-              seats={v.seats}
-              daily_rate={v.daily_rate}
-              status={v.status}
-              photo={v.photo}
-              reg_no={v.reg_no}
-            />
-          ))}
-        </div>
+
+        {isSearching ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {cards.map(card)}
+          </div>
+        ) : (
+          sections.map((section) => (
+            <section key={section.cat} className="mb-10 last:mb-0">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="text-lg font-semibold text-slate-800">{section.label}</h2>
+                <span className="text-xs text-slate-400">
+                  {section.items.length} vehicle{section.items.length === 1 ? '' : 's'}
+                </span>
+              </div>
+              <div className="veh-strip">{section.items.map(card)}</div>
+            </section>
+          ))
+        )}
+
         {cards.length === 0 && (
           <div className="bg-white rounded-xl border border-gray-200 text-center py-20 text-slate-400">
             No vehicles match your search — try different dates or filters.
