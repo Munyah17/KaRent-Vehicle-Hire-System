@@ -38,7 +38,7 @@ export default async function ExtensionsPage() {
           <h2 className="font-semibold text-slate-800">Extension Requests</h2>
         </div>
         <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full rsp">
           <thead>
             <tr>
               <th className="th">Booking</th>
@@ -52,16 +52,16 @@ export default async function ExtensionsPage() {
           <tbody>
             {extsRes.map((x) => (
               <tr className="table-row" key={x.id}>
-                <td className="td font-medium">{x.booking_ref}</td>
-                <td className="td">
+                <td className="td font-medium" data-label="Booking">{x.booking_ref}</td>
+                <td className="td" data-label="Vehicle">
                   {x.make} {x.model}
                 </td>
-                <td className="td">{fmtDateTime(x.new_return_at)}</td>
-                <td className="td">{money(x.additional_amount)}</td>
-                <td className="td">
+                <td className="td" data-label="New Return">{fmtDateTime(x.new_return_at)}</td>
+                <td className="td" data-label="Extra Cost">{money(x.additional_amount)}</td>
+                <td className="td" data-label="Status">
                   <Badge status={x.status} />
                 </td>
-                <td className="td text-right">
+                <td className="td text-right" data-label="">
                   <Link href={`/client/bookings/${x.booking_id}`} className="text-blue-600 text-sm hover:underline">
                     Booking
                   </Link>

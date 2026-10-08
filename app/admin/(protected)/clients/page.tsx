@@ -89,7 +89,7 @@ export default async function ClientsPage({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full rsp">
           <thead>
             <tr>
               <th className="th">Client</th>
@@ -104,7 +104,7 @@ export default async function ClientsPage({
           <tbody>
             {rows.map((c) => (
               <tr key={c.id} className="table-row">
-                <td className="td">
+                <td className="td" data-label="Client">
                   <div className="flex items-center gap-3">
                     <span className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
                       {c.full_name.charAt(0).toUpperCase()}
@@ -115,19 +115,19 @@ export default async function ClientsPage({
                     </div>
                   </div>
                 </td>
-                <td className="td">{c.client_no}</td>
-                <td className="td">{c.phone ?? '—'}</td>
-                <td className="td">
+                <td className="td" data-label="Client No">{c.client_no}</td>
+                <td className="td" data-label="Phone">{c.phone ?? '—'}</td>
+                <td className="td" data-label="KYC">
                   <Badge status={c.kyc_status} />
                 </td>
-                <td className="td">
+                <td className="td" data-label="Source">
                   {c.source
                     .split('_')
                     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
                     .join(' ')}
                 </td>
-                <td className="td">{fmtDate(c.created_at)}</td>
-                <td className="td text-right">
+                <td className="td" data-label="Joined">{fmtDate(c.created_at)}</td>
+                <td className="td text-right" data-label="">
                   <a href="#" className="text-blue-600 hover:underline text-sm">
                     Edit
                   </a>

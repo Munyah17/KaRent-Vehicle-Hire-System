@@ -19,7 +19,7 @@ export default async function BookingsPage() {
         </Link>
       </div>
       <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full rsp">
         <thead>
           <tr>
             <th className="th">Ref</th>
@@ -34,17 +34,17 @@ export default async function BookingsPage() {
         <tbody>
           {bookings.map((b) => (
             <tr className="table-row" key={b.id}>
-              <td className="td font-medium">{b.ref}</td>
-              <td className="td">
+              <td className="td font-medium" data-label="Ref">{b.ref}</td>
+              <td className="td" data-label="Vehicle">
                 {b.make} {b.model} <span className="text-xs text-slate-400">({b.reg_no})</span>
               </td>
-              <td className="td">{fmtDateTime(b.pickup_at)}</td>
-              <td className="td">{fmtDateTime(b.return_at)}</td>
-              <td className="td">
+              <td className="td" data-label="Pickup">{fmtDateTime(b.pickup_at)}</td>
+              <td className="td" data-label="Return">{fmtDateTime(b.return_at)}</td>
+              <td className="td" data-label="Status">
                 <Badge status={b.status} />
               </td>
-              <td className="td font-medium">{money(b.total)}</td>
-              <td className="td text-right">
+              <td className="td font-medium" data-label="Total">{money(b.total)}</td>
+              <td className="td text-right" data-label="">
                 <Link href={`/client/bookings/${b.id}`} className="text-blue-600 text-sm hover:underline">
                   View
                 </Link>

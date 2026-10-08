@@ -14,7 +14,7 @@ export default async function DepositsPage() {
         <h2 className="font-semibold text-slate-800">Security Deposits</h2>
       </div>
       <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full rsp">
         <thead>
           <tr>
             <th className="th">Booking</th>
@@ -32,16 +32,16 @@ export default async function DepositsPage() {
             const held = Number(d.received_amount) - Number(d.deducted_amount) - Number(d.refunded_amount);
             return (
               <tr className="table-row" key={d.id}>
-                <td className="td font-medium">{d.booking_ref}</td>
-                <td className="td">
+                <td className="td font-medium" data-label="Booking">{d.booking_ref}</td>
+                <td className="td" data-label="Vehicle">
                   {d.make} {d.model}
                 </td>
-                <td className="td">{money(d.required_amount)}</td>
-                <td className="td">{money(d.received_amount)}</td>
-                <td className="td text-red-600">{money(d.deducted_amount)}</td>
-                <td className="td">{money(d.refunded_amount)}</td>
-                <td className="td font-medium">{money(held)}</td>
-                <td className="td">
+                <td className="td" data-label="Required">{money(d.required_amount)}</td>
+                <td className="td" data-label="Received">{money(d.received_amount)}</td>
+                <td className="td text-red-600" data-label="Deductions">{money(d.deducted_amount)}</td>
+                <td className="td" data-label="Refunded">{money(d.refunded_amount)}</td>
+                <td className="td font-medium" data-label="Held">{money(held)}</td>
+                <td className="td" data-label="Status">
                   <Badge status={d.status} />
                 </td>
               </tr>

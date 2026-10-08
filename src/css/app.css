@@ -29,6 +29,33 @@
    overflow-x-auto containers instead). 'clip' preserves sticky positioning. */
 html, body { overflow-x: clip; }
 
+/* Responsive tables — below 768px each row becomes a stacked card with
+   "Label: value" pairs taken from each cell's data-label attribute, so
+   tables adapt to the screen instead of forcing sideways scrolling. */
+@media (max-width: 768px) {
+    table.rsp thead { display: none; }
+    table.rsp, table.rsp tbody { display: block; width: 100%; }
+    table.rsp tbody tr {
+        display: block; padding: .65rem .95rem;
+        border-bottom: 1px solid #eef1f4;
+    }
+    table.rsp tbody tr:last-child { border-bottom: 0; }
+    table.rsp td {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: .85rem; padding: .32rem 0 !important; border: 0 !important;
+        text-align: right; white-space: normal !important;
+    }
+    table.rsp td::before {
+        content: attr(data-label); font-size: .68rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: .05em; color: #94a3b8;
+        text-align: left; flex-shrink: 0;
+    }
+    table.rsp td[data-label=""] { justify-content: flex-end; }
+    table.rsp td[data-label=""]::before, table.rsp td[colspan]::before { content: none; }
+    table.rsp td[colspan] { display: block; text-align: center; }
+}
+html.dark table.rsp tbody tr { border-color: #23262c; }
+
 /* ------------------------------------------------------------------
    Dark theme — activated by <html data-bs-theme="dark" class="dark">.
    Covers the CoolAdmin chrome (via its own CSS vars) plus every utility

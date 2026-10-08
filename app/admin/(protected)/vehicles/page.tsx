@@ -91,7 +91,7 @@ export default async function VehiclesPage({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full rsp">
           <thead>
             <tr>
               <th className="th">Reg No</th>
@@ -107,20 +107,20 @@ export default async function VehiclesPage({
           <tbody>
             {rows.map((v) => (
               <tr key={v.id} className="table-row">
-                <td className="td font-medium text-slate-800">{v.reg_no}</td>
-                <td className="td">
+                <td className="td font-medium text-slate-800" data-label="Reg No">{v.reg_no}</td>
+                <td className="td" data-label="Make / Model">
                   {v.make} {v.model}
                 </td>
-                <td className="td">{v.year ?? '—'}</td>
-                <td className="td">
+                <td className="td" data-label="Year">{v.year ?? '—'}</td>
+                <td className="td" data-label="Type">
                   {v.fuel_type.charAt(0).toUpperCase() + v.fuel_type.slice(1)} &middot;{' '}
                   {v.transmission.charAt(0).toUpperCase() + v.transmission.slice(1)}
                 </td>
-                <td className="td">
+                <td className="td" data-label="Status">
                   <Badge status={v.status} />
                 </td>
-                <td className="td font-medium">{money(v.daily_rate)}</td>
-                <td className="td">
+                <td className="td font-medium" data-label="Daily Rate">{money(v.daily_rate)}</td>
+                <td className="td" data-label="Visible">
                   <span className={v.is_public ? 'text-green-600' : 'text-gray-400'}>
                     <i
                       data-lucide={v.is_public ? 'eye' : 'eye-off'}
@@ -128,7 +128,7 @@ export default async function VehiclesPage({
                     ></i>
                   </span>
                 </td>
-                <td className="td text-right">
+                <td className="td text-right" data-label="">
                   <a href="#" className="text-blue-600 hover:underline text-sm">
                     Edit
                   </a>

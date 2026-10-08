@@ -24,7 +24,7 @@ export default async function WalletPage() {
           <h3 className="font-semibold text-slate-800">Transaction History</h3>
         </div>
         <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full rsp">
           <thead>
             <tr>
               <th className="th">Ref</th>
@@ -37,11 +37,12 @@ export default async function WalletPage() {
           <tbody>
             {txns.map((t) => (
               <tr className="table-row" key={t.id}>
-                <td className="td font-medium">{t.ref}</td>
-                <td className="td">{ucwords(t.type)}</td>
-                <td className="td">{t.description ?? '—'}</td>
-                <td className="td">{fmtDateTime(t.created_at)}</td>
+                <td className="td font-medium" data-label="Ref">{t.ref}</td>
+                <td className="td" data-label="Type">{ucwords(t.type)}</td>
+                <td className="td" data-label="Description">{t.description ?? '—'}</td>
+                <td className="td" data-label="Date">{fmtDateTime(t.created_at)}</td>
                 <td
+                  data-label="Amount"
                   className={`td text-right font-semibold ${
                     Number(t.amount) < 0 ? 'text-red-600' : 'text-green-600'
                   }`}

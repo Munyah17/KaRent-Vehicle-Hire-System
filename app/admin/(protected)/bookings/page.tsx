@@ -100,7 +100,7 @@ export default async function BookingsPage({
         </a>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full rsp">
           <thead>
             <tr>
               <th className="th">Ref</th>
@@ -119,18 +119,18 @@ export default async function BookingsPage({
               const vehicle = Array.isArray(b.vehicles) ? b.vehicles[0] : b.vehicles;
               return (
                 <tr key={b.id} className="table-row">
-                  <td className="td font-medium text-slate-800">{b.ref}</td>
-                  <td className="td">{client?.full_name}</td>
-                  <td className="td">
+                  <td className="td font-medium text-slate-800" data-label="Ref">{b.ref}</td>
+                  <td className="td" data-label="Client">{client?.full_name}</td>
+                  <td className="td" data-label="Vehicle">
                     {vehicle?.reg_no}
                   </td>
-                  <td className="td">{fmtDate(b.pickup_at)}</td>
-                  <td className="td">{fmtDate(b.return_at)}</td>
-                  <td className="td">
+                  <td className="td" data-label="Pickup">{fmtDate(b.pickup_at)}</td>
+                  <td className="td" data-label="Return">{fmtDate(b.return_at)}</td>
+                  <td className="td" data-label="Status">
                     <Badge status={b.status} />
                   </td>
-                  <td className="td font-medium">{money(b.total)}</td>
-                  <td className="td text-right">
+                  <td className="td font-medium" data-label="Total">{money(b.total)}</td>
+                  <td className="td text-right" data-label="">
                     <Link href={`/admin/bookings/${b.id}`} className="text-blue-600 text-sm hover:underline">
                       View
                     </Link>

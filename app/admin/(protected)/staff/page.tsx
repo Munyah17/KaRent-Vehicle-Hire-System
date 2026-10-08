@@ -57,7 +57,7 @@ export default async function StaffPage({
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="font-semibold text-slate-800">Staff Accounts</h3>
           </div>
-          <table className="w-full">
+          <table className="w-full rsp">
             <thead>
               <tr>
                 <th className="th">Name</th>
@@ -73,7 +73,7 @@ export default async function StaffPage({
                 const roleName = Array.isArray(s.roles) ? s.roles[0]?.name : s.roles?.name;
                 return (
                   <tr key={s.id} className="table-row">
-                    <td className="td">
+                    <td className="td" data-label="Name">
                       <div className="flex items-center gap-3">
                         <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
                           {s.name.charAt(0).toUpperCase()}
@@ -81,8 +81,8 @@ export default async function StaffPage({
                         <span className="font-medium">{s.name}</span>
                       </div>
                     </td>
-                    <td className="td">{s.email}</td>
-                    <td className="td">
+                    <td className="td" data-label="Email">{s.email}</td>
+                    <td className="td" data-label="Role">
                       {roleName === 'SUPER_ADMIN' ? (
                         <>
                           <Badge status="verified" /> SUPER_ADMIN
@@ -93,11 +93,11 @@ export default async function StaffPage({
                         </>
                       )}
                     </td>
-                    <td className="td">
+                    <td className="td" data-label="Status">
                       <Badge status={s.status} />
                     </td>
-                    <td className="td">{fmtDate(s.last_login_at)}</td>
-                    <td className="td text-right space-x-2">
+                    <td className="td" data-label="Last login">{fmtDate(s.last_login_at)}</td>
+                    <td className="td text-right space-x-2" data-label="">
                       <a href="#" className="text-blue-600 text-sm hover:underline">
                         Permissions
                       </a>

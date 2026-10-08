@@ -16,7 +16,7 @@ export default async function PaymentsPage() {
         <h2 className="font-semibold text-slate-800">Payment History</h2>
       </div>
       <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full rsp">
         <thead>
           <tr>
             <th className="th">Txn ID</th>
@@ -31,15 +31,15 @@ export default async function PaymentsPage() {
         <tbody>
           {payments.map((p) => (
             <tr className="table-row" key={p.id}>
-              <td className="td font-medium">{p.txn_id}</td>
-              <td className="td">{p.booking_ref ?? '—'}</td>
-              <td className="td">{ucwords(p.method)}</td>
-              <td className="td">{p.purpose.charAt(0).toUpperCase() + p.purpose.slice(1)}</td>
-              <td className="td">
+              <td className="td font-medium" data-label="Txn ID">{p.txn_id}</td>
+              <td className="td" data-label="Booking">{p.booking_ref ?? '—'}</td>
+              <td className="td" data-label="Method">{ucwords(p.method)}</td>
+              <td className="td" data-label="Purpose">{p.purpose.charAt(0).toUpperCase() + p.purpose.slice(1)}</td>
+              <td className="td" data-label="Status">
                 <Badge status={p.status} />
               </td>
-              <td className="td">{fmtDateTime(p.paid_at ?? p.created_at)}</td>
-              <td className="td text-right font-medium">{money(p.amount)}</td>
+              <td className="td" data-label="Date">{fmtDateTime(p.paid_at ?? p.created_at)}</td>
+              <td className="td text-right font-medium" data-label="Amount">{money(p.amount)}</td>
             </tr>
           ))}
           {!payments.length && (
