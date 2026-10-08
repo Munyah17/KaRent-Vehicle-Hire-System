@@ -3,13 +3,28 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, SunMoon, X, RefreshCw } from 'lucide-react';
+import { Menu, SunMoon, X, RefreshCw, Bell, Settings, ShieldCheck, ChevronDown } from 'lucide-react';
 import type { SessionUser } from '@/lib/auth';
 import { logoutAction } from './authActions';
 
 export default function Header({ companyName }: { companyName: string }) {
   const pathname = usePathname() || '/';
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [acctOpen, setAcctOpen] = useState(false);
+
+  const forceRefresh = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('_r', String(Date.now()));
+    window.location.href = url.toString();
+  };
+
+  // Role-aware account links — clients get their portal pages, staff go
+  // to the back office.
+  const acctLinks = user
+    ? user.role === 'CLIENT'
+      ? { profile: '/client/profile', notif: '/client/notifications', settings: '/client/settings', home: '/client' }
+      : { profile: '/admin', notif: '/admin', settings: '/admin', home: '/admin' }
+    : null;
 
   // Checkbox-driven drawer â€” opens/closes with zero JS. On client-side
   // navigation we clear it so the drawer doesn't stay open on the new page.
@@ -59,9 +74,9 @@ export default function Header({ companyName }: { companyName: string }) {
             htmlFor="navdrawer"
             aria-label="Open menu"
             aria-controls="siteDrawer"
-            className="nav-drawer-btn inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 cursor-pointer"
+            className="nav-drawer-btn inline-flex items-center justify-center w-9 h-9 -ml-2 text-slate-600 hover:text-slate-900 cursor-pointer"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-6 h-6" />
           </label>
           <nav className="hidden md:flex items-center gap-8 text-sm" style={{ marginLeft: 'auto', marginRight: '1.75rem' }}>
             {navItems.map((item) => (
@@ -75,43 +90,73 @@ export default function Header({ companyName }: { companyName: string }) {
             ))}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3 text-sm">
-            <button
-              type="button"
-              title="Force Refresh Updates"
-              aria-label="Force Refresh Updates"
-              onClick={() => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('_r', String(Date.now()));
-                window.location.href = url.toString();
-              }}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-gray-200 text-slate-600 hover:bg-gray-50 font-medium"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="text-xs whitespace-nowrap">Force Refresh Updates</span>
-            </button>
-            <button className="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
+            <button className="theme-toggle hidden md:inline-flex" type="button" data-theme-toggle title="Toggle dark / light mode">
               <SunMoon className="w-4 h-4" />
             </button>
-            {user ? (
-              <>
-                {user.role === 'CLIENT' ? (
-                  <Link href="/client" className="hidden sm:inline text-slate-600 hover:text-slate-900">
-                    My Account
-                  </Link>
-                ) : (
-                  <Link href="/admin" className="hidden sm:inline text-slate-600 hover:text-slate-900">
-                    Back Office
-                  </Link>
+            {user && acctLinks ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAcctOpen((v) => !v)}
+                  aria-label="Account menu"
+                  aria-expanded={acctOpen}
+                  className="flex items-center gap-1.5"
+                >
+                  <span className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+                    {(user.name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+                </button>
+                {acctOpen && (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Close account menu"
+                      className="fixed inset-0 z-40 cursor-default"
+                      onClick={() => setAcctOpen(false)}
+                    />
+                    <div className="absolute right-0 top-12 z-50 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 text-sm">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="font-semibold text-slate-800 truncate">{user.name}</p>
+                        <p className="text-xs text-slate-400">
+                          {user.role === 'CLIENT' ? 'Client account' : user.role.replace('_', ' ')}
+                        </p>
+                      </div>
+                      <Link
+                        href={acctLinks.profile}
+                        onClick={() => setAcctOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                      >
+                        <ShieldCheck className="w-4 h-4" /> My Profile
+                      </Link>
+                      <Link
+                        href={acctLinks.notif}
+                        onClick={() => setAcctOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                      >
+                        <Bell className="w-4 h-4" /> Notifications
+                      </Link>
+                      <Link
+                        href={acctLinks.settings}
+                        onClick={() => setAcctOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                      >
+                        <Settings className="w-4 h-4" /> Settings
+                      </Link>
+                      <div className="border-t border-gray-100 mt-1 pt-1">
+                        <form action={logoutAction}>
+                          <button
+                            type="submit"
+                            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50 text-left"
+                          >
+                            Sign Out
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </>
                 )}
-                <form action={logoutAction} className="inline">
-                  <button
-                    type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium"
-                  >
-                    Sign out
-                  </button>
-                </form>
-              </>
+              </div>
             ) : (
               <>
                 <Link
@@ -122,7 +167,7 @@ export default function Header({ companyName }: { companyName: string }) {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium"
+                  className="hidden sm:inline bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium"
                 >
                   Get Started
                 </Link>
@@ -190,6 +235,24 @@ export default function Header({ companyName }: { companyName: string }) {
             </Link>
           ))}
         </nav>
+        <div className="px-3 py-3 border-t border-gray-200 space-y-1 text-sm">
+          <button
+            type="button"
+            onClick={forceRefresh}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-gray-50 text-left"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Force Refresh Updates
+          </button>
+          <button
+            type="button"
+            data-theme-toggle
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-gray-50 text-left"
+          >
+            <SunMoon className="w-4 h-4" />
+            Light / Dark Mode
+          </button>
+        </div>
         <div className="px-5 py-4 border-t border-gray-200 text-sm space-y-3">
           {user ? (
             <>
