@@ -1,46 +1,58 @@
 # Project: KaRent — Vehicle Hire Management System
 
-Plain-PHP 8 + MySQL/MariaDB vehicle rental system. Public website, client
-portal and staff back office on one database. Tailwind CSS UI (compiled,
-no runtime Node). Deploys to ordinary cPanel shared hosting.
+Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS + Supabase
+(Postgres). Deploys to Vercel; production domain https://rentacar.munya.co.zw.
+
+The legacy PHP/MySQL application is maintained in a SEPARATE folder — this
+workspace is JavaScript-only. Do not create .php files here.
 
 ## Git workflow — READ FIRST
 
 - Remote: `origin` → https://github.com/Munyah17/KaRent-Vehicle-Hire-System.git
-- **After every successful build/change, commit AND push to `origin main` —
-  do not wait to be asked.**
+- **After every successful change, commit AND push to `origin main` —
+  pushing triggers the production Vercel deploy automatically.**
 - **Push-only, never pull.** Do not run `git pull`, `fetch`+merge, `rebase`,
-  or checkout remote branches. Local is the authoritative copy; the repo is
-  open source for others but changes must never flow back into local files.
+  or checkout remote branches. Local is the authoritative copy.
 - Do not amend/force-push existing history unless explicitly told.
-- `config/config.php` contains real credentials — it is gitignored and must
-  never be committed.
+- Secrets live in `.env.local` (local Supabase) and `.env.prod` (pulled
+  production env). Both are gitignored — never commit them.
 
 ## Run locally
 
-- PHP built-in server: `php -S localhost:8000 -t public`
-- Local DB: portable MariaDB lives in `.dev/mariadb-11.8.9-winx64/` (gitignored).
-  Start: `& .dev\mariadb-11.8.9-winx64\bin\mysqld.exe --datadir=.dev\data --port=3306`
-- Built-in server is single-threaded on Windows — never make server-to-server
-  HTTP calls to itself (causes deadlock).
+- `npm run dev` → http://localhost:6333
+- Local Supabase must be running for data pages (URL in `.env.local`).
+  If it's offline, build prerendering fails — use
+  `node .dev/build-with-prod-env.js` to build against production env.
 
 ## Build & verify
 
-- CSS: `npx tailwindcss -c tailwind.config.js -i src/css/app.css -o public/assets/css/app.css --minify` (or `npm run build:css`)
-- Lint all PHP: `php -l` over every file (must be 0 failures before commit)
-- Demo accounts (seed.sql): `admin@demo.test/Admin@123`,
-  `staff@demo.test/Staff@123`, `john@demo.test/Client@123`
-- Paynow: vendored SDK in `app/Vendor/paynow/` (paynow.co.zw — NOT the Polish
-  pay-now package). Without credentials + `test_mode`, `public/paynow/simulate.php`
-  drives the full payment lifecycle locally.
+- `npm run build` (runs `build:css` then `next build`) — must be green.
+- `npx tsc --noEmit` for a quick type check.
+- CSS: `npm run build:css` compiles `src/css/app.css` →
+  `public/assets/css/app.css` via `tailwind.config.cjs`. This is loaded
+  with a manual `<link>` — globals.css has no @tailwind directives. If you
+  add new utility classes, the stylesheet must be rebuilt.
+- Deploy: `git push` (auto) or `npx vercel deploy --prod` then
+  `vercel alias set <deployment> rentacar.munya.co.zw`.
+- Demo accounts (supabase/seed.sql): `admin@demo.test/Admin@123`,
+  `staff@demo.test/Staff@123`, `john@demo.test/Client@123`.
 
 ## Conventions
 
-- All business logic in `app/Services/*.php` — pages must stay thin.
-- Server-side truth only: prices, totals, availability are recalculated in
-  services; never trust POSTed amounts.
-- `storage/` holds private files (KYC, contracts, logs) — served only through
-  `admin/doc.php`. `public/uploads/` is public but script-free (.htaccess).
-- Every admin page calls `Auth::requirePermission(...)`; every form uses
-  `Csrf::field()`.
-- No placeholder buttons — every control must do real work.
+- `app/` holds routes: `(public)` route group has site Header/Footer via
+  its own layout; `admin/`, `client/`, `super-admin/` have none.
+- Root `app/layout.tsx` is a slim shell (html/body + theme init). Do NOT
+  add `headers()`/`cookies()`/`force-dynamic` there — public pages rely on
+  ISR (`revalidate = 120` in `(public)/layout.tsx`).
+- Session is read server-side via `getSession()` (JWT cookie) or
+  client-side via `/api/me` — the public Header uses `/api/me` so public
+  pages stay cacheable.
+- All DB access goes through `src/lib/supabase.ts` (service-role,
+  server-only, 15s fetch timeout). Never import it in client components.
+- Icons: `lucide-react` components only. No `data-lucide` + UMD script on
+  public pages (that combination caused a MutationObserver freeze).
+- `public/uploads/` vehicle images are committed so Git-triggered
+  deployments include them.
+- `public/.htaccess` files are Apache-only and kept intentionally for a
+  possible future cPanel deploy — they are inert on Vercel.
+- `.dev/` holds JS helper scripts (seed/build utils) — dev only.

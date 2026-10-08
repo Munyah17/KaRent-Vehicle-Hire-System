@@ -30,7 +30,7 @@ export async function createTicketAction(prev: ActionState, formData: FormData):
   });
   if (error) return { error: 'Could not submit request. Please try again.' };
 
-  await notifyStaff('support', 'New support request', `${client.full_name}: ${subject}`, 'admin/support.php');
+  await notifyStaff('support', 'New support request', `${client.full_name}: ${subject}`, '/admin');
   revalidatePath('/client/support');
   return { ok: true, success: "Request submitted — we'll get back to you soon." };
 }

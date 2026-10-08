@@ -62,7 +62,7 @@ export async function requestExtensionAction(prev: ActionState, formData: FormDa
     'extension',
     `Extension requested ${b.ref}`,
     `Requested return: ${newReturn} (+${money(additional)})`,
-    `admin/booking.php?id=${bookingId}`
+    `/admin/bookings`
   );
   revalidatePath(`/client/bookings/${bookingId}`);
   revalidatePath('/client/extensions');
@@ -162,7 +162,7 @@ export async function payWalletAction(prev: ActionState, formData: FormData): Pr
     'payment',
     'Payment received',
     `${money(amount)} received (wallet).`,
-    'client/payments.php'
+    '/client/payments'
   ).catch(() => {});
 
   revalidatePath(`/client/bookings/${bookingId}`);

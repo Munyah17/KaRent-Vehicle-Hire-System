@@ -115,7 +115,7 @@ export async function uploadDocAction(prev: ActionState, formData: FormData): Pr
     'kyc',
     'KYC document uploaded',
     `${ctx.client.full_name} uploaded a ${docType.replace(/_/g, ' ')}`,
-    `admin/client-edit.php?id=${ctx.client.id}`
+    `/admin/clients`
   ).catch(() => {});
 
   revalidatePath('/client/profile');

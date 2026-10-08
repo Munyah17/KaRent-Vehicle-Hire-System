@@ -7,14 +7,13 @@
  *
  *   npm run build:css
  *
- * Content paths must cover every source of utility classes — the legacy
- * PHP templates AND the Next.js/TSX app.
+ * Content paths cover the Next.js/TSX app (the legacy PHP app lives in a
+ * separate folder — do not scan for PHP templates here).
  */
 module.exports = {
     content: [
-        './app/**/*.{ts,tsx,php}',
+        './app/**/*.{ts,tsx}',
         './src/**/*.{ts,tsx}',
-        './public/**/*.php',
     ],
     theme: {
         extend: {
