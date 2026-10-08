@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useActionState } from 'react';
+import { Car } from 'lucide-react';
 import { loginAction, LoginState } from '@/app/(public)/login/action';
 
 const DEMO = { email: 'john@demo.test', password: 'Client@123' };
@@ -14,7 +15,7 @@ export default function LoginForm() {
     <form action={action} className="space-y-4">
       <div className="text-center mb-6">
         <span className="inline-flex w-12 h-12 rounded-xl bg-blue-600 text-white items-center justify-center mb-3">
-          <i data-lucide="car" className="w-6 h-6"></i>
+          <Car className="w-6 h-6" />
         </span>
         <h1 className="text-xl font-semibold text-slate-800">Welcome back</h1>
         <p className="text-sm text-slate-500">Sign in to your account</p>

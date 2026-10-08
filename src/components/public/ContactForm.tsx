@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { Send } from 'lucide-react';
 import { submitContact, ContactState } from '@/app/(public)/contact/action';
 
 export default function ContactForm({ initialSubject }: { initialSubject: string }) {
@@ -39,7 +40,7 @@ export default function ContactForm({ initialSubject }: { initialSubject: string
         ></textarea>
       </div>
       <button className="btn-primary justify-center !px-8" disabled={pending}>
-        <i data-lucide="send" className="w-4 h-4"></i> Send Message
+        <Send className="w-4 h-4" /> Send Message
       </button>
       {state?.success && (
         <div className="rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm">

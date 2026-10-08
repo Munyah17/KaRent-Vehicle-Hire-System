@@ -3,7 +3,6 @@ import { join } from 'node:path';
 import { allSettings } from '@/lib/settings';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
-import LucideInit from '@/components/public/LucideInit';
 
 // Public pages revalidate every 2 minutes — the layout's only data
 // dependency is `allSettings` (Supabase), which is not a Dynamic API,
@@ -34,12 +33,10 @@ export default async function PublicLayout({ children }: { children: React.React
         href={`/assets/css/app.css?v=${assetV('assets/css/app.css')}`}
         precedence="default"
       />
-      <script src={`/assets/vendor/lucide.min.js?v=${assetV('assets/vendor/lucide.min.js')}`} defer />
       <script src={`/assets/js/theme.js?v=${assetV('assets/js/theme.js')}`} defer />
       <Header companyName={settings.companyName} />
       {children}
       <Footer {...settings} />
-      <LucideInit />
     </>
   );
 }

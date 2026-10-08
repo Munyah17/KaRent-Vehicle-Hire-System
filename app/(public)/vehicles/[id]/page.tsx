@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { ArrowLeft, CalendarCheck } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 import {
   getVehicle,
@@ -93,7 +94,7 @@ export default async function VehicleDetailPage({
           href="/vehicles"
           className="text-sm text-blue-600 hover:underline mb-6 inline-flex items-center gap-1"
         >
-          <i data-lucide="arrow-left" className="w-4 h-4"></i> Back to vehicles
+          <ArrowLeft className="w-4 h-4" /> Back to vehicles
         </Link>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mt-4">
           <div className="xl:col-span-2">
@@ -214,7 +215,7 @@ export default async function VehicleDetailPage({
               </div>
               {available && (
                 <Link href={bookHref} className="btn-primary w-full justify-center mt-4 !py-3 text-base">
-                  <i data-lucide="calendar-check" className="w-5 h-5"></i>
+                  <CalendarCheck className="w-5 h-5" />
                   {bookLabel}
                 </Link>
               )}

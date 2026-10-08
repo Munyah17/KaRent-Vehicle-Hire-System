@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { Phone, Mail, MapPin, Clock, Headset, ArrowRight, type LucideIcon } from 'lucide-react';
 import { setting } from '@/lib/settings';
 import ContactForm from '@/components/public/ContactForm';
 
@@ -19,11 +20,11 @@ export default async function ContactPage({
 
   const cleanPhone = phone ? phone.replace(/\s+/g, '') : '';
 
-  const channels: [string, string, string, string | null][] = [
-    ['phone', 'Call us', phone || '-', cleanPhone ? `tel:${cleanPhone}` : null],
-    ['mail', 'Email us', email || '-', email ? `mailto:${email}` : null],
-    ['map-pin', 'Visit us', address || '-', null],
-    ['clock', 'Working hours', 'Mon–Fri 8:00–17:30 · Sat 9:00–13:00 · Sun closed', null],
+  const channels: [LucideIcon, string, string, string | null][] = [
+    [Phone, 'Call us', phone || '-', cleanPhone ? `tel:${cleanPhone}` : null],
+    [Mail, 'Email us', email || '-', email ? `mailto:${email}` : null],
+    [MapPin, 'Visit us', address || '-', null],
+    [Clock, 'Working hours', 'Mon–Fri 8:00–17:30 · Sat 9:00–13:00 · Sun closed', null],
   ];
 
   return (
@@ -42,10 +43,10 @@ export default async function ContactPage({
       <section className="max-w-6xl mx-auto px-6 -mt-10 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-4">
-            {channels.map(([icon, label, value, link]) => (
+            {channels.map(([Icon, label, value, link]) => (
               <div key={label} className="card flex items-start gap-4 hover:shadow-md transition-shadow">
                 <span className="icon-box bg-blue-600 text-white shadow-sm">
-                  <i data-lucide={icon} className="w-5 h-5"></i>
+                  <Icon className="w-5 h-5" />
                 </span>
                 <div className="min-w-0">
                   <p className="font-semibold text-slate-800">{label}</p>
@@ -61,7 +62,7 @@ export default async function ContactPage({
             ))}
             <div className="rounded-xl bg-blue-50 border border-blue-100 p-5">
               <p className="font-semibold text-slate-800 flex items-center gap-2">
-                <i data-lucide="headset" className="w-5 h-5 text-blue-600"></i> Need an urgent hire?
+                <Headset className="w-5 h-5 text-blue-600" /> Need an urgent hire?
               </p>
               <p className="text-sm text-slate-600 mt-1">
                 Call us directly — same-day pickups are often possible on popular models.
@@ -70,7 +71,7 @@ export default async function ContactPage({
                 href="/vehicles"
                 className="inline-flex items-center gap-1.5 text-sm text-blue-600 font-medium mt-3 hover:underline"
               >
-                Browse the fleet <i data-lucide="arrow-right" className="w-4 h-4"></i>
+                Browse the fleet <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

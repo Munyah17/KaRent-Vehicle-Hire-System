@@ -15,4 +15,11 @@ if (!supabaseServiceKey) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Hard timeout on every PostgREST call — a stalled pooler/DB must surface
+// as an error (error.tsx retry page), never an endlessly-hanging response.
+const fetchWithTimeout: typeof fetch = (input, init) =>
+  fetch(input, { ...init, signal: AbortSignal.timeout(15_000) });
+
+export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  global: { fetch: fetchWithTimeout },
+});

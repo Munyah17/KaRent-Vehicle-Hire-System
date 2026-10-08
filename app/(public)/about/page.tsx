@@ -1,5 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import {
+  Wallet, Car, CarFront, Sparkles, Truck, Wrench,
+  ShieldCheck, Banknote, Headphones, CreditCard, FileCheck, MapPin,
+  type LucideIcon,
+} from 'lucide-react';
 import { setting } from '@/lib/settings';
 
 export const metadata: Metadata = { title: 'About' };
@@ -61,20 +66,20 @@ export default async function AboutPage() {
             <p className="text-sm text-slate-500 mt-2">Five categories, one standard: clean, inspected, ready to go.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              ['wallet', 'Budget', 'Cheapest daily rates — hatchbacks and compact city cars.'],
-              ['car', 'Sedans', 'Comfortable saloons for business travel and family trips.'],
-              ['car-front', 'SUVs & 4x4s', 'Ground clearance and space for rough roads and long journeys.'],
-              ['sparkles', 'Premium', 'Executive and luxury models for occasions that matter.'],
-              ['truck', 'Trucks & Pickups', 'Double cabs and load movers for work crews and sites.'],
-              ['wrench', 'Utility', 'Work vehicles for field, farm and site operations.'],
-            ].map(([icon, t, d]) => (
+            {([
+              [Wallet, 'Budget', 'Cheapest daily rates — hatchbacks and compact city cars.'],
+              [Car, 'Sedans', 'Comfortable saloons for business travel and family trips.'],
+              [CarFront, 'SUVs & 4x4s', 'Ground clearance and space for rough roads and long journeys.'],
+              [Sparkles, 'Premium', 'Executive and luxury models for occasions that matter.'],
+              [Truck, 'Trucks & Pickups', 'Double cabs and load movers for work crews and sites.'],
+              [Wrench, 'Utility', 'Work vehicles for field, farm and site operations.'],
+            ] as [LucideIcon, string, string][]).map(([Icon, t, d]) => (
               <div
                 key={t}
                 className="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 hover:shadow-md transition-shadow"
               >
                 <span className="icon-box bg-blue-50 text-blue-600 shrink-0">
-                  <i data-lucide={icon} className="w-5 h-5"></i>
+                  <Icon className="w-5 h-5" />
                 </span>
                 <div>
                   <p className="font-semibold text-slate-800 text-sm">{t}</p>
@@ -115,16 +120,16 @@ export default async function AboutPage() {
             <h2 className="text-2xl font-semibold text-slate-800">Why customers choose us</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              ['shield-check', 'Safe journeys', 'Regular maintenance plus documented pre-hire inspections with photo records on every vehicle.'],
-              ['banknote', 'Transparent pricing', 'Clear daily, weekly and monthly rates — the quote you see is the quote you pay. No hidden fees.'],
-              ['headphones', 'Real support', 'Booking help, extensions, replacements and roadside queries — before, during and after your rental.'],
-              ['credit-card', 'Flexible payments', 'Pay online via Paynow, top up your wallet, or settle at the office — deposits tracked and refunded.'],
-              ['file-check', 'Proper paperwork', 'Every hire gets a contract, checklist and receipts — all accessible in your client account.'],
-              ['map-pin', 'Local expertise', 'We know the roads you drive — city commutes, cross-border trips, gravel routes and beyond.'],
-            ].map(([icon, t, d]) => (
+            {([
+              [ShieldCheck, 'Safe journeys', 'Regular maintenance plus documented pre-hire inspections with photo records on every vehicle.'],
+              [Banknote, 'Transparent pricing', 'Clear daily, weekly and monthly rates — the quote you see is the quote you pay. No hidden fees.'],
+              [Headphones, 'Real support', 'Booking help, extensions, replacements and roadside queries — before, during and after your rental.'],
+              [CreditCard, 'Flexible payments', 'Pay online via Paynow, top up your wallet, or settle at the office — deposits tracked and refunded.'],
+              [FileCheck, 'Proper paperwork', 'Every hire gets a contract, checklist and receipts — all accessible in your client account.'],
+              [MapPin, 'Local expertise', 'We know the roads you drive — city commutes, cross-border trips, gravel routes and beyond.'],
+            ] as [LucideIcon, string, string][]).map(([Icon, t, d]) => (
               <div key={t} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <i data-lucide={icon} className="w-7 h-7 text-blue-600 mb-3"></i>
+                <Icon className="w-7 h-7 text-blue-600 mb-3" />
                 <p className="font-semibold text-slate-800">{t}</p>
                 <p className="text-sm text-slate-500 mt-1.5">{d}</p>
               </div>

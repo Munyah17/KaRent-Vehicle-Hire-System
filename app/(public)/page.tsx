@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Globe, User, ShieldCheck, LayoutGrid } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { setting } from '@/lib/settings';
 import HeroSlider, { HeroSlide } from '@/components/public/HeroSlider';
@@ -148,7 +149,7 @@ export default async function HomePage() {
           <div className="card !p-3">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <i data-lucide="globe" className="w-4 h-4"></i>
+                <Globe className="w-4 h-4" />
               </span>
               <div className="min-w-0">
                 <h3 className="font-semibold text-slate-800 text-sm">Browse as guest</h3>
@@ -164,7 +165,7 @@ export default async function HomePage() {
           <div className="card !p-3">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <i data-lucide="user" className="w-4 h-4"></i>
+                <User className="w-4 h-4" />
               </span>
               <div className="min-w-0">
                 <h3 className="font-semibold text-slate-800 text-sm">Client portal</h3>
@@ -180,7 +181,7 @@ export default async function HomePage() {
           <div className="card !p-3">
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <i data-lucide="shield-check" className="w-4 h-4"></i>
+                <ShieldCheck className="w-4 h-4" />
               </span>
               <div className="min-w-0">
                 <h3 className="font-semibold text-slate-800 text-sm">Simple &amp; secure</h3>
@@ -269,7 +270,7 @@ export default async function HomePage() {
 
       <section className="max-w-7xl mx-auto px-6 pb-16 text-center">
         <Link href="/vehicles" className="btn-primary inline-flex !px-8 !py-3">
-          <i data-lucide="layout-grid" className="w-4 h-4"></i> Browse the full fleet
+          <LayoutGrid className="w-4 h-4" /> Browse the full fleet
         </Link>
       </section>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type HeroSlide = {
   image: string;
@@ -90,7 +91,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             onClick={() => go(i - 1)}
             className="absolute z-20 left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
           >
-            <i data-lucide="chevron-left" className="w-5 h-5"></i>
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             type="button"
@@ -99,7 +100,7 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             onClick={() => go(i + 1)}
             className="absolute z-20 right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center"
           >
-            <i data-lucide="chevron-right" className="w-5 h-5"></i>
+            <ChevronRight className="w-5 h-5" />
           </button>
           <div
             className="absolute z-20 bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5"

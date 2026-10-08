@@ -120,14 +120,19 @@ html.dark .site-header .text-slate-700 { color: #dde2e7; }
 }
 html.dark .theme-toggle { background-color: #23262c; border-color: #363b44; color: #f3c276; }
 #theme-chooser {
-    position: fixed; inset: 0; z-index: 9999; display: none;
-    align-items: center; justify-content: center;
-    background: rgba(15, 17, 21, .65); padding: 1rem;
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 60; display: none;
+    /* Intentionally no backdrop — the card must never block page taps. */
 }
-#theme-chooser.show { display: flex; }
+#theme-chooser.show { display: block; }
 .theme-chooser-card {
-    @apply bg-white rounded-xl shadow-xl border border-gray-200 p-6 w-full max-w-sm text-center;
+    @apply bg-white rounded-xl shadow-xl border border-gray-200 p-5 w-full text-center relative;
+    max-width: 19rem;
     background: var(--tc-bg, #fff); color: var(--tc-text, #1e293b);
+}
+.theme-chooser-close {
+    position: absolute; top: .35rem; right: .55rem;
+    font-size: 1.1rem; line-height: 1; color: #94a3b8; cursor: pointer;
+    background: none; border: 0; padding: .25rem;
 }
 .theme-icon { font-size: 2rem; line-height: 1; }
 .theme-chooser-title { font-size: 1.05rem; font-weight: 600; margin: .5rem 0 .25rem; }

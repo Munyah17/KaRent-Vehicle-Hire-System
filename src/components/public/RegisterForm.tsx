@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { UserPlus } from 'lucide-react';
 import { registerAction, RegisterState } from '@/app/(public)/register/action';
 
 export default function RegisterForm() {
@@ -10,7 +11,7 @@ export default function RegisterForm() {
     <form action={action} className="space-y-4">
       <div className="text-center mb-6">
         <span className="inline-flex w-12 h-12 rounded-xl bg-blue-600 text-white items-center justify-center mb-3">
-          <i data-lucide="user-plus" className="w-6 h-6"></i>
+          <UserPlus className="w-6 h-6" />
         </span>
         <h1 className="text-xl font-semibold text-slate-800">Create your account</h1>
         <p className="text-sm text-slate-500">Book vehicles faster with an account</p>

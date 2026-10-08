@@ -43,10 +43,13 @@
             return;
         }
 
+        // Non-blocking floating card — it must never cover the page or
+        // intercept taps, so there is deliberately no full-screen overlay.
         var box = document.createElement('div');
         box.id = 'theme-chooser';
         box.innerHTML =
             '<div class="theme-chooser-card">' +
+            '<button type="button" class="theme-chooser-close" aria-label="Dismiss">×</button>' +
             '<div class="theme-icon">◐</div>' +
             '<h2 class="theme-chooser-title">Choose your appearance</h2>' +
             '<p class="theme-chooser-sub">You can change this anytime using the toggle in the header.</p>' +
@@ -57,6 +60,10 @@
         document.body.appendChild(box);
         box.classList.add('show');
 
+        box.querySelector('.theme-chooser-close').addEventListener('click', function () {
+            apply(current());
+            box.remove();
+        });
         box.querySelectorAll('[data-choose]').forEach(function (b) {
             b.addEventListener('click', function () {
                 apply(b.getAttribute('data-choose'));

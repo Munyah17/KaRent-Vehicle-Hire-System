@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Search } from 'lucide-react';
 
 export default function SearchForm() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function SearchForm() {
         />
       </div>
       <button className="btn-primary !px-6 justify-center">
-        <i data-lucide="search" className="w-4 h-4"></i> Find a vehicle
+        <Search className="w-4 h-4" /> Find a vehicle
       </button>
     </form>
   );

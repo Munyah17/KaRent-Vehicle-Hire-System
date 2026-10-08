@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FormEvent } from 'react';
+import { Search } from 'lucide-react';
 
 const catLabels: Record<string, string> = {
   budget: 'Budget',
@@ -83,7 +84,7 @@ export default function VehicleFilters() {
         />
       </div>
       <button className="btn-primary">
-        <i data-lucide="search" className="w-4 h-4"></i> Search
+        <Search className="w-4 h-4" /> Search
       </button>
     </form>
   );

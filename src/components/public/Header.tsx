@@ -1,15 +1,22 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Menu, SunMoon, X } from 'lucide-react';
 import type { SessionUser } from '@/lib/auth';
 import { logoutAction } from './authActions';
 
 export default function Header({ companyName }: { companyName: string }) {
   const pathname = usePathname() || '/';
-  const [open, setOpen] = useState(false);
   const [user, setUser] = useState<SessionUser | null>(null);
+
+  // Checkbox-driven drawer â€” opens/closes with zero JS. On client-side
+  // navigation we clear it so the drawer doesn't stay open on the new page.
+  useEffect(() => {
+    const cb = document.getElementById('navdrawer') as HTMLInputElement | null;
+    if (cb?.checked) cb.checked = false;
+  }, [pathname]);
 
   useEffect(() => {
     let live = true;
@@ -36,39 +43,26 @@ export default function Header({ companyName }: { companyName: string }) {
     return pathname.startsWith('/' + key);
   };
 
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-    };
-  }, [open]);
-
   return (
     <>
+      <input type="checkbox" id="navdrawer" className="peer sr-only" aria-hidden="true" />
       <header className="site-header bg-white border-b border-gray-200 text-slate-700 sticky top-0 z-40">
         <style>{`
-          @media (min-width: 768px) { .nav-drawer-btn, #drawerBackdrop, #siteDrawer { display: none !important; } }
+          @media (min-width: 768px) { .nav-drawer-btn, #drawerBackdrop, #siteDrawer, #navdrawer { display: none !important; } }
+          #navdrawer:checked ~ #drawerBackdrop { opacity: 1 !important; pointer-events: auto !important; }
+          #navdrawer:checked ~ #siteDrawer { transform: translateX(0) !important; }
+          #navdrawer:checked ~ .site-header { position: fixed; left: 0; right: 0; }
         `}</style>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button
+          <label
             id="drawerBtn"
-            type="button"
+            htmlFor="navdrawer"
             aria-label="Open menu"
             aria-controls="siteDrawer"
-            onClick={() => setOpen(true)}
-            className="nav-drawer-btn inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50"
+            className="nav-drawer-btn inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 cursor-pointer"
           >
-            <i data-lucide="menu" className="w-5 h-5"></i>
-          </button>
+            <Menu className="w-5 h-5" />
+          </label>
           <nav className="hidden md:flex items-center gap-8 text-sm" style={{ marginLeft: 'auto', marginRight: '1.75rem' }}>
             {navItems.map((item) => (
               <Link
@@ -82,7 +76,7 @@ export default function Header({ companyName }: { companyName: string }) {
           </nav>
           <div className="flex items-center gap-2 sm:gap-3 text-sm">
             <button className="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
-              <i data-lucide="sun-moon" className="w-4 h-4"></i>
+              <SunMoon className="w-4 h-4" />
             </button>
             {user ? (
               <>
@@ -124,16 +118,17 @@ export default function Header({ companyName }: { companyName: string }) {
         </div>
       </header>
 
-      <div
+      <label
         id="drawerBackdrop"
-        onClick={() => setOpen(false)}
+        htmlFor="navdrawer"
+        aria-label="Close menu"
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 40,
           background: 'rgba(0,0,0,.5)',
-          opacity: open ? 1 : 0,
-          pointerEvents: open ? 'auto' : 'none',
+          opacity: 0,
+          pointerEvents: 'none',
           transition: 'opacity .3s',
         }}
       />
@@ -148,7 +143,7 @@ export default function Header({ companyName }: { companyName: string }) {
           width: '16rem',
           zIndex: 50,
           background: '#fff',
-          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          transform: 'translateX(-100%)',
           transition: 'transform .3s',
           display: 'flex',
           flexDirection: 'column',
@@ -156,22 +151,20 @@ export default function Header({ companyName }: { companyName: string }) {
       >
         <div className="flex items-center justify-between px-5 h-16 border-b border-gray-200">
           <span className="font-semibold text-slate-800 dark:text-slate-100">Menu</span>
-          <button
+          <label
             id="drawerClose"
-            type="button"
+            htmlFor="navdrawer"
             aria-label="Close menu"
-            onClick={() => setOpen(false)}
-            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 cursor-pointer"
           >
-            <i data-lucide="x" className="w-5 h-5"></i>
-          </button>
+            <X className="w-5 h-5" />
+          </label>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 text-sm">
           {navItems.map((item) => (
             <Link
               key={item.key}
               href={item.href}
-              onClick={() => setOpen(false)}
               className={
                 'drawer-link block px-3 py-2.5 rounded-md ' +
                 (active(item.key)
@@ -202,14 +195,12 @@ export default function Header({ companyName }: { companyName: string }) {
             <>
               <Link
                 href="/register"
-                onClick={() => setOpen(false)}
                 className="block bg-blue-600 text-white text-center rounded-md px-4 py-2 font-medium"
               >
                 Get Started
               </Link>
               <Link
                 href="/login"
-                onClick={() => setOpen(false)}
                 className="block text-center text-slate-600"
               >
                 Sign in
@@ -221,3 +212,4 @@ export default function Header({ companyName }: { companyName: string }) {
     </>
   );
 }
+
