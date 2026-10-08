@@ -37,7 +37,8 @@ export default async function ExtensionsPage() {
         <div className="px-6 py-4 border-b border-gray-100">
           <h2 className="font-semibold text-slate-800">Extension Requests</h2>
         </div>
-        <table className="w-full">
+        <div className="overflow-x-auto">
+      <table className="w-full">
           <thead>
             <tr>
               <th className="th">Booking</th>
@@ -76,6 +77,7 @@ export default async function ExtensionsPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
       <div className="card">
         <h3 className="font-semibold text-slate-800 mb-2">Request an extension</h3>

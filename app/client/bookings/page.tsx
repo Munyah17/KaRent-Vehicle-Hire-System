@@ -18,6 +18,7 @@ export default async function BookingsPage() {
           <Plus className="w-4 h-4" /> New booking
         </Link>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr>
@@ -62,6 +63,7 @@ export default async function BookingsPage() {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

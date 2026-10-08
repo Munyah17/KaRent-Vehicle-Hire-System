@@ -23,7 +23,8 @@ export default async function WalletPage() {
         <div className="px-6 py-4 border-b border-gray-100">
           <h3 className="font-semibold text-slate-800">Transaction History</h3>
         </div>
-        <table className="w-full">
+        <div className="overflow-x-auto">
+      <table className="w-full">
           <thead>
             <tr>
               <th className="th">Ref</th>
@@ -59,6 +60,7 @@ export default async function WalletPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

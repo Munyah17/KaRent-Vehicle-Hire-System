@@ -15,6 +15,7 @@ export default async function PaymentsPage() {
       <div className="px-6 py-4 border-b border-gray-100">
         <h2 className="font-semibold text-slate-800">Payment History</h2>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr>
@@ -50,6 +51,7 @@ export default async function PaymentsPage() {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

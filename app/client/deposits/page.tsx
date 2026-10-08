@@ -13,6 +13,7 @@ export default async function DepositsPage() {
       <div className="px-6 py-4 border-b border-gray-100">
         <h2 className="font-semibold text-slate-800">Security Deposits</h2>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr>
@@ -55,6 +56,7 @@ export default async function DepositsPage() {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

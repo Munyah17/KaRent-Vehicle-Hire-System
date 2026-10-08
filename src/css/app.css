@@ -24,6 +24,11 @@
     .icon-box { @apply w-10 h-10 rounded-lg flex items-center justify-center; }
 }
 
+/* Never allow a stray wide element to widen the page itself — the page must
+   not pan sideways on touch devices (wide tables scroll inside their own
+   overflow-x-auto containers instead). 'clip' preserves sticky positioning. */
+html, body { overflow-x: clip; }
+
 /* ------------------------------------------------------------------
    Dark theme — activated by <html data-bs-theme="dark" class="dark">.
    Covers the CoolAdmin chrome (via its own CSS vars) plus every utility
