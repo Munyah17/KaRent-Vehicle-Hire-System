@@ -20,6 +20,9 @@ import {
   X,
   SunMoon,
   Bell,
+  RefreshCw,
+  Globe,
+  ChevronDown,
 } from 'lucide-react';
 import { logoutAction } from '@/app/client/actions';
 
@@ -63,6 +66,7 @@ export default function ClientShell({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [acctOpen, setAcctOpen] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -80,6 +84,43 @@ export default function ClientShell({
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
+
+  const forceRefresh = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('_r', String(Date.now()));
+    window.location.href = url.toString();
+  };
+
+  const initial = (name || 'U').charAt(0).toUpperCase();
+
+  const utilLinks = (drawer: boolean) => (
+    <>
+      <Link
+        href="/"
+        onClick={drawer ? close : undefined}
+        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-gray-50"
+      >
+        <Globe className="w-4 h-4" />
+        Go To Website
+      </Link>
+      <button
+        type="button"
+        onClick={forceRefresh}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-gray-50 text-left"
+      >
+        <RefreshCw className="w-4 h-4" />
+        Force Refresh Updates
+      </button>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-slate-600 hover:bg-gray-50 text-left"
+      >
+        <SunMoon className="w-4 h-4" />
+        Light / Dark Mode
+      </button>
+    </>
+  );
 
   const navLinks = (drawer: boolean) =>
     NAV_ITEMS.map((item) => {
@@ -120,37 +161,76 @@ export default function ClientShell({
             aria-label="Open menu"
             aria-controls="siteDrawer"
             onClick={() => setOpen(true)}
-            className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50"
+            className="inline-flex items-center justify-center w-9 h-9 -ml-1 text-slate-600 hover:text-slate-800"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-3 sm:gap-4 text-sm">
+          <div className="flex items-center gap-3 sm:gap-4 text-sm relative">
             <button
-              className="theme-toggle"
               type="button"
-              data-theme-toggle
-              title="Toggle dark / light mode"
-              onClick={toggleTheme}
+              onClick={() => setAcctOpen((v) => !v)}
+              aria-label="Account menu"
+              aria-expanded={acctOpen}
+              className="flex items-center gap-1.5"
             >
-              <SunMoon className="w-4 h-4" />
+              <span className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+                {initial}
+              </span>
+              <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
             </button>
-            <Link href="/client/notifications" className="relative text-slate-500 hover:text-slate-700">
-              <Bell className="w-5 h-5" />
-              {unread > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                  {unread}
-                </span>
-              )}
-            </Link>
-            <span className="text-slate-500 hidden md:block">{name}</span>
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md font-medium"
-              >
-                Sign out
-              </button>
-            </form>
+            {acctOpen && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Close account menu"
+                  className="fixed inset-0 z-40 cursor-default"
+                  onClick={() => setAcctOpen(false)}
+                />
+                <div className="absolute right-0 top-12 z-50 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 text-sm">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="font-semibold text-slate-800 truncate">{name}</p>
+                  </div>
+                  <Link
+                    href="/client/profile"
+                    onClick={() => setAcctOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                  >
+                    <ShieldCheck className="w-4 h-4" /> My Profile
+                  </Link>
+                  <Link
+                    href="/client/notifications"
+                    onClick={() => setAcctOpen(false)}
+                    className="flex items-center justify-between px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Bell className="w-4 h-4" /> Notifications
+                    </span>
+                    {unread > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+                        {unread}
+                      </span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/client/settings"
+                    onClick={() => setAcctOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50"
+                  >
+                    <Settings className="w-4 h-4" /> Settings
+                  </Link>
+                  <div className="border-t border-gray-100 mt-1 pt-1">
+                    <form action={logoutAction}>
+                      <button
+                        type="submit"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-slate-600 hover:bg-gray-50 text-left"
+                      >
+                        Sign Out
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -171,6 +251,9 @@ export default function ClientShell({
           </button>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 text-sm">{navLinks(true)}</nav>
+        <div className="px-3 py-4 border-t border-gray-200 space-y-1 text-sm">
+          {utilLinks(true)}
+        </div>
       </aside>
 
       <div id="portalBody" className="max-w-7xl mx-auto">
@@ -180,6 +263,9 @@ export default function ClientShell({
             Menu
           </div>
           <nav className="flex-1 px-3 py-4 space-y-1 text-sm">{navLinks(false)}</nav>
+          <div className="px-3 py-4 border-t border-gray-200 space-y-1 text-sm">
+            {utilLinks(false)}
+          </div>
         </aside>
         <main className="px-4 sm:px-6 py-6 sm:py-8 w-full">{children}</main>
       </div>

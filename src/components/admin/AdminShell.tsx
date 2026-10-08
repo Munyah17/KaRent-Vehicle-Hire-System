@@ -243,6 +243,54 @@ export default function AdminShell({
               })}
             </ul>
           </nav>
+          <div
+            style={{
+              borderTop: '1px solid rgba(255,255,255,.08)',
+              padding: '14px 18px',
+            }}
+          >
+            <ul className="list-unstyled navbar__list">
+              <li>
+                <Link href="/" onClick={() => setMobileOpen(false)}>
+                  <i className="fa-solid fa-globe"></i>Go To Website
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('_r', String(Date.now()));
+                    window.location.href = url.toString();
+                  }}
+                >
+                  <i className="fa-solid fa-rotate"></i>Force Refresh Updates
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const html = document.documentElement;
+                    const dark = html.getAttribute('data-bs-theme') === 'dark';
+                    if (dark) {
+                      html.classList.remove('dark');
+                      html.removeAttribute('data-bs-theme');
+                      localStorage.setItem('karent.theme', 'light');
+                    } else {
+                      html.classList.add('dark');
+                      html.setAttribute('data-bs-theme', 'dark');
+                      localStorage.setItem('karent.theme', 'dark');
+                    }
+                  }}
+                >
+                  <i className="fa-solid fa-circle-half-stroke"></i>Light / Dark Mode
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </aside>
 
