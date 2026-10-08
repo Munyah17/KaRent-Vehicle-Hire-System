@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, SunMoon, X } from 'lucide-react';
+import { Menu, SunMoon, X, RefreshCw } from 'lucide-react';
 import type { SessionUser } from '@/lib/auth';
 import { logoutAction } from './authActions';
 
@@ -75,6 +75,21 @@ export default function Header({ companyName }: { companyName: string }) {
             ))}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3 text-sm">
+            <button
+              type="button"
+              title="Refresh — get the latest version"
+              aria-label="Refresh page"
+              onClick={() => {
+                // Reload via a cache-busting URL so the browser cannot
+                // serve a stale cached copy after a new deployment.
+                const url = new URL(window.location.href);
+                url.searchParams.set('_r', String(Date.now()));
+                window.location.href = url.toString();
+              }}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 text-slate-600 hover:bg-gray-50"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
             <button className="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
               <SunMoon className="w-4 h-4" />
             </button>
