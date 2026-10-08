@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -78,17 +78,16 @@ export default function Header({ companyName }: { companyName: string }) {
             <button
               type="button"
               title="Force Refresh Updates"
+              aria-label="Force Refresh Updates"
               onClick={() => {
-                // Reload via a cache-busting URL so the browser cannot
-                // serve a stale cached copy after a new deployment.
                 const url = new URL(window.location.href);
                 url.searchParams.set('_r', String(Date.now()));
                 window.location.href = url.toString();
               }}
-              className="inline-flex items-center justify-center gap-1.5 h-9 rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 px-2.5 sm:px-3 text-xs font-medium"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-gray-200 text-slate-600 hover:bg-gray-50 font-medium"
             >
               <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">Force Refresh Updates</span>
+              <span className="text-xs whitespace-nowrap">Force Refresh Updates</span>
             </button>
             <button className="theme-toggle" type="button" data-theme-toggle title="Toggle dark / light mode">
               <SunMoon className="w-4 h-4" />
@@ -190,17 +189,6 @@ export default function Header({ companyName }: { companyName: string }) {
               {item.label}
             </Link>
           ))}
-          <button
-            type="button"
-            onClick={() => {
-              const url = new URL(window.location.href);
-              url.searchParams.set('_r', String(Date.now()));
-              window.location.href = url.toString();
-            }}
-            className="drawer-link flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-left text-slate-600 hover:bg-gray-50"
-          >
-            <RefreshCw className="w-4 h-4" /> Force Refresh Updates
-          </button>
         </nav>
         <div className="px-5 py-4 border-t border-gray-200 text-sm space-y-3">
           {user ? (
